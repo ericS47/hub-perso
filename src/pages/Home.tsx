@@ -1,86 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Task } from '../db'
-import {
-  DEFAULT_CITY,
-  fetchForecast,
-  geocodeCity,
-  getPosition,
-  weatherIcon,
-  type Coords,
-  type DayForecast,
-} from '../weather'
+import { useWeather } from '../hooks/useWeather'
+import { DEFAULT_CITY, weatherIcon } from '../weather'
 
-// Données de démonstration, remplacées par Google Agenda en phase 1 (étape suivante).
+// Données de démonstration, remplacées par Google Agenda une fois branché.
 const agendaPreview = [
   { time: '09:00', label: 'Réunion équipe' },
   { time: '14:30', label: 'Séance APA' },
 ]
 
-const dayLabels = ["Aujourd'hui", 'Demain', 'Après-demain']
+// Pastilles autour de la météo : position sur le cercle (cf. maquette F).
+const modules = [
+  { to: '/culture', label: 'Culture', color: '#a78bfa', pos: 1 },
+  { to: '/finance', label: 'Finance', color: '#34d399', pos: 2 },
+  { to: '/info', label: 'Info', color: '#f87171', pos: 3 },
+  { to: '/emploi', label: 'Emploi', color: '#60a5fa', pos: 4 },
+  { to: '/promo', label: 'Promo', color: '#fb923c', pos: 5 },
+]
 
-function Weather() {
-  const [place, setPlace] = useState<Coords | null>(null)
-  const [forecast, setForecast] = useState<DayForecast[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [locating, setLocating] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      try {
-        const coords = await geocodeCity(DEFAULT_CITY)
-        if (!coords) throw new Error('Ville introuvable')
-        if (cancelled) return
-        setPlace(coords)
-        setForecast(await fetchForecast(coords.lat, coords.lon))
-      } catch {
-        if (!cancelled) setError('Météo indisponible')
-      }
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  async function locate() {
-    setLocating(true)
-    setError(null)
-    try {
-      const pos = await getPosition()
-      const { latitude: lat, longitude: lon } = pos.coords
-      setPlace({ lat, lon, name: 'Ma position' })
-      setForecast(await fetchForecast(lat, lon))
-    } catch {
-      setError('Localisation refusée ou indisponible')
-    } finally {
-      setLocating(false)
-    }
-  }
+function Ring() {
+  const { place, forecast, error, locating, locate } = useWeather()
+  const today = forecast?.[0]
+  const tomorrow = forecast?.[1]
 
   return (
-    <section className="card weather">
-      <div className="weather-head">
-        <h2>Météo · {place?.name ?? DEFAULT_CITY}</h2>
-        <button className="link-btn-primary small" onClick={locate} disabled={locating}>
+    <div className="ring">
+      <div className="ring-outline" aria-hidden="true" />
+
+      <div className="ring-center">
+        <span className="ring-place">{place?.name ?? DEFAULT_CITY}</span>
+        {error ? (
+          <span className="muted small-text">{error}</span>
+        ) : (
+          <>
+            <span className="ring-temp">
+              {today ? `${today.tempMax}°` : '…'}
+              {today && <span className="ring-icon" aria-hidden="true">{weatherIcon(today.code)}</span>}
+            </span>
+            {tomorrow && <span className="ring-tomorrow">Demain {tomorrow.tempMax}°</span>}
+          </>
+        )}
+        <button type="button" className="ring-locate" onClick={locate} disabled={locating}>
           {locating ? '…' : 'Me localiser'}
         </button>
       </div>
-      {error && <p className="muted">{error}</p>}
-      {!error && !forecast && <p className="muted">Chargement…</p>}
-      {forecast && (
-        <div className="weather-row">
-          {forecast.map((d, i) => (
-            <div key={d.date} className="weather-day">
-              <span className="muted">{dayLabels[i]}</span>
-              <span className="weather-icon" aria-hidden="true">{weatherIcon(d.code)}</span>
-              <strong>{d.tempMax}° / {d.tempMin}°</strong>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
+
+      {modules.map((m) => (
+        <Link
+          key={m.to}
+          to={m.to}
+          className={`ring-item ring-pos-${m.pos}`}
+          style={{ '--c': m.color } as React.CSSProperties}
+        >
+          {m.label}
+        </Link>
+      ))}
+    </div>
   )
 }
 
@@ -125,7 +102,7 @@ function Tasks() {
 
   return (
     <section className="card">
-      <h2>Tâches ({open.length})</h2>
+      <h2>À faire ({open.length})</h2>
       <form className="task-form" onSubmit={add}>
         <input
           value={title}
@@ -133,7 +110,7 @@ function Tasks() {
           placeholder="Nouvelle tâche"
           aria-label="Nouvelle tâche"
         />
-        <button type="submit">Ajouter</button>
+        <button type="submit" className="btn">Ajouter</button>
       </form>
       <ul className="plain-list">
         {tasks.map((t) => (
@@ -153,15 +130,21 @@ function Tasks() {
 }
 
 export default function Home() {
+  // Date figée à l'ouverture de la page : pas d'appel à Date pendant le rendu.
+  const [now] = useState(() => new Date())
+
   return (
     <div className="home">
       <header className="home-header">
+        <div className="home-date">
+          {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </div>
         <h1>Bonjour</h1>
-        <p className="muted">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
       </header>
+
+      <Ring />
       <Agenda />
       <Tasks />
-      <Weather />
     </div>
   )
 }
