@@ -1,17 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
 import BottomNav from './components/BottomNav'
 import Home from './pages/Home'
-import Module from './pages/Module'
+import Info from './pages/Info'
+import Emploi from './pages/Emploi'
+import Promo from './pages/Promo'
 import Culture from './pages/Culture'
 import Library from './pages/Library'
 import Finance from './pages/Finance'
 import Portfolio from './pages/Portfolio'
-
-const modules = [
-  { path: '/info', title: 'Info' },
-  { path: '/emploi', title: 'Emploi' },
-  { path: '/promo', title: 'Promo' },
-]
 
 export default function App() {
   return (
@@ -24,9 +20,9 @@ export default function App() {
           <Route path="/culture/:category" element={<Library />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/finance/portefeuille" element={<Portfolio />} />
-          {modules.map((m) => (
-            <Route key={m.path} path={m.path} element={<Module title={m.title} />} />
-          ))}
+          <Route path="/info" element={<Info />} />
+          <Route path="/emploi" element={<Emploi />} />
+          <Route path="/promo" element={<Promo />} />
         </Routes>
       </main>
       <BottomNav />

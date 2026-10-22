@@ -257,3 +257,6 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .ring-pos-4 { left: 67px; top: 216px; }
 .ring-pos-5 { left: 26px; top: 88px; }
 
+
+.search-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.search-item:last-child { border-bottom: none; }
