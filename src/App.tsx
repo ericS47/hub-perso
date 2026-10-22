@@ -4,9 +4,10 @@ import Home from './pages/Home'
 import Module from './pages/Module'
 import Culture from './pages/Culture'
 import Library from './pages/Library'
+import Finance from './pages/Finance'
+import Portfolio from './pages/Portfolio'
 
 const modules = [
-  { path: '/finance', title: 'Finance' },
   { path: '/info', title: 'Info' },
   { path: '/emploi', title: 'Emploi' },
   { path: '/promo', title: 'Promo' },
@@ -21,6 +22,8 @@ export default function App() {
           <Route path="/culture" element={<Culture />} />
           <Route path="/culture/liste/:listId" element={<Library />} />
           <Route path="/culture/:category" element={<Library />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/finance/portefeuille" element={<Portfolio />} />
           {modules.map((m) => (
             <Route key={m.path} path={m.path} element={<Module title={m.title} />} />
           ))}

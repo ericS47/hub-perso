@@ -225,3 +225,16 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .list-toggles { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; }
 .list-toggle { display: flex; gap: 6px; align-items: center; cursor: pointer; }
 .small-link { align-self: flex-start; font-size: 0.8rem; padding: 0; }
+
+.small-text { font-size: 0.8rem; }
+.chart-wrap { display: flex; flex-direction: column; gap: 4px; }
+.chart { width: 100%; height: 180px; }
+.action-card { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--text); }
+.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.summary { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.summary div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gain { color: #16a34a; }
+.loss { color: #dc2626; }
+.position { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+.position input { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; width: 140px; }
+.position-head { display: flex; justify-content: space-between; align-items: center; }

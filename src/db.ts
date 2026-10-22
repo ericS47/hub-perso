@@ -26,10 +26,28 @@ export interface CultureList {
   createdAt: number
 }
 
+export interface Portfolio {
+  id?: number
+  name: string
+  createdAt: number
+}
+
+export interface Position {
+  id?: number
+  portfolioId: number
+  name: string
+  quantity: number
+  buyPrice: number
+  currentPrice: number
+  createdAt: number
+}
+
 class HubDB extends Dexie {
   tasks!: Table<Task, number>
   items!: Table<CultureItem, number>
   lists!: Table<CultureList, number>
+  portfolios!: Table<Portfolio, number>
+  positions!: Table<Position, number>
 
   constructor() {
     super('hub')
@@ -42,6 +60,13 @@ class HubDB extends Dexie {
       tasks: '++id, done, createdAt',
       items: '++id, category, createdAt, *listIds',
       lists: '++id, createdAt',
+    })
+    this.version(3).stores({
+      tasks: '++id, done, createdAt',
+      items: '++id, category, createdAt, *listIds',
+      lists: '++id, createdAt',
+      portfolios: '++id, createdAt',
+      positions: '++id, portfolioId',
     })
   }
 }
