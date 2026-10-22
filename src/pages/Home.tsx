@@ -21,7 +21,7 @@ const modules = [
 ]
 
 function Ring() {
-  const { place, forecast, error, locating, locate } = useWeather()
+  const { place, forecast, error } = useWeather()
   const today = forecast?.[0]
   const tomorrow = forecast?.[1]
 
@@ -42,8 +42,8 @@ function Ring() {
             {tomorrow && <span className="ring-tomorrow">Demain {tomorrow.tempMax}°</span>}
           </>
         )}
-        <button type="button" className="ring-locate" onClick={locate} disabled={locating}>
-          {locating ? '…' : 'Me localiser'}
+        <button type="button" className="ring-locate" disabled>
+          Me localiser
         </button>
       </div>
 
