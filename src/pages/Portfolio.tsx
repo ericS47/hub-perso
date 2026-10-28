@@ -5,8 +5,11 @@ import { db, type Portfolio as PortfolioType, type Position } from '../db'
 
 const eur = (n: number) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
 
-// Saisie tolérante : accepte la virgule comme séparateur décimal.
-const parseNumber = (s: string) => Number(s.replace(',', '.'))
+// Saisie tolérante : virgule décimale et espaces acceptés ; vide = invalide (NaN), pas 0.
+const parseNumber = (s: string) => {
+  const clean = s.replace(/\s/g, '').replace(',', '.')
+  return clean === '' ? NaN : Number(clean)
+}
 
 export default function Portfolio() {
   const portfolios = useLiveQuery(() => db.portfolios.orderBy('createdAt').toArray(), [], [] as PortfolioType[])
@@ -50,9 +53,13 @@ export default function Portfolio() {
     setPBuy('')
   }
 
-  async function setCurrentPrice(p: Position, value: string) {
-    const price = parseNumber(value)
-    if (p.id === undefined || !(price >= 0)) return
+  async function setCurrentPrice(p: Position, input: HTMLInputElement) {
+    const price = parseNumber(input.value)
+    if (p.id === undefined || !(price >= 0)) {
+      // Saisie refusée : le champ reprend la valeur enregistrée.
+      input.value = String(p.currentPrice)
+      return
+    }
     await db.positions.update(p.id, { currentPrice: price })
   }
 
@@ -109,7 +116,7 @@ export default function Portfolio() {
               <div>
                 <span className="muted">Plus ou moins-value</span>
                 <strong className={gain >= 0 ? 'gain' : 'loss'}>
-                  {eur(gain)} ({gainPct.toFixed(1)} %)
+                  {eur(gain)} ({gainPct.toLocaleString('fr-FR', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} %)
                 </strong>
               </div>
             </div>
@@ -151,7 +158,7 @@ export default function Portfolio() {
                           key={p.currentPrice}
                           defaultValue={String(p.currentPrice)}
                           inputMode="decimal"
-                          onBlur={(e) => setCurrentPrice(p, e.target.value)}
+                          onBlur={(e) => setCurrentPrice(p, e.currentTarget)}
                           aria-label={`Cours actuel de ${p.name}`}
                         />
                       </label>

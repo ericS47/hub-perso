@@ -8,6 +8,7 @@ import Culture from './pages/Culture'
 import Library from './pages/Library'
 import Finance from './pages/Finance'
 import Portfolio from './pages/Portfolio'
+import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/info" element={<Info />} />
           <Route path="/emploi" element={<Emploi />} />
           <Route path="/promo" element={<Promo />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <BottomNav />

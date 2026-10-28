@@ -21,8 +21,12 @@ export default function PriceChart({ coinId }: Props) {
       grid: { vertLines: { visible: false }, horzLines: { color: 'rgba(156,163,175,0.15)' } },
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false },
+      localization: {
+        locale: 'fr-FR',
+        priceFormatter: (price: number) => `${price.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €`,
+      },
     })
-    const series = chart.addSeries(LineSeries, { color: '#2563eb', lineWidth: 2 })
+    const series = chart.addSeries(LineSeries, { color: '#34d399', lineWidth: 2 })
 
     let cancelled = false
     fetchCryptoHistory(coinId)

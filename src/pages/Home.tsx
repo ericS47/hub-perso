@@ -84,8 +84,8 @@ function Tasks() {
     e.preventDefault()
     const clean = title.trim()
     if (!clean) return
-    await db.tasks.add({ title: clean, done: false, createdAt: Date.now() })
     setTitle('')
+    await db.tasks.add({ title: clean, done: false, createdAt: Date.now() })
   }
 
   async function toggle(task: Task) {

@@ -55,17 +55,19 @@ export default function Library() {
     e.preventDefault()
     const clean = title.trim()
     if (!clean || !cat) return
+    const coverUrl = cover.trim() || undefined
+    // Formulaire vidé avant l'écriture : une saisie rapide suivante n'est pas effacée.
+    setTitle('')
+    setCover('')
     await db.items.add({
       title: clean,
       category: cat.id,
-      cover: cover.trim() || undefined,
+      cover: coverUrl,
       seen: false,
       priority: false,
       listIds: [],
       createdAt: Date.now(),
     })
-    setTitle('')
-    setCover('')
   }
 
   if (!isList && !cat) {

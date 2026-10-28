@@ -1,32 +1,22 @@
-# React + TypeScript + Vite
+# Hub perso
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Application web progressive (PWA) qui regroupe au même endroit : culture, finance, info, emploi et promos, avec la météo, l'agenda et une liste de tâches sur l'accueil.
 
-Currently, two official plugins are available:
+Les données (tâches, bibliothèque culture, portefeuilles virtuels) restent sur l'appareil, dans le navigateur (IndexedDB). Rien n'est envoyé à un serveur.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Lancer en local
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Publier
+
+Chaque envoi sur `main` construit l'app et la publie sur GitHub Pages (workflow `.github/workflows/deploy.yml`) :
+https://erics47.github.io/hub-perso/
+
+## Sources de données
+
+- Météo : Open-Meteo (sans clé)
+- Cours Bitcoin et Ethereum : CoinGecko (sans clé)
