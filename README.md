@@ -20,4 +20,4 @@ https://erics47.github.io/hub-perso/
 
 - Météo : Open-Meteo (sans clé)
 - Cours Bitcoin et Ethereum : CoinGecko (sans clé)
-- Couvertures Culture (recherche à la demande, sans clé) : iTunes (films, séries), Google Livres et Open Library (livres), Wikipédia (jeux, spectacles). Les photos importées restent dans l'appareil.
+- Culture, propositions pendant la saisie du titre et couvertures (sans clé) : iTunes (films, séries), Google Livres et Open Library (livres), Wikipédia (jeux, spectacles). Les photos importées restent dans l'appareil.

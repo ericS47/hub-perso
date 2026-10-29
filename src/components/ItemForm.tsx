@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { db, type CultureCategory, type CultureItem, type CultureList, type Ownership } from '../db'
 import { CATEGORIES, OWNERSHIP, doneLabel, parseGenres } from '../culture/categories'
+import type { Suggestion } from '../culture/suggest'
 import CoverPicker from './CoverPicker'
+import TitleAutocomplete from './TitleAutocomplete'
 import Sheet from './Sheet'
 
 interface Props {
@@ -30,6 +32,13 @@ export default function ItemForm({ item, defaultCategory, knownGenres, lists, on
 
   function addGenre(g: string) {
     setGenres([...current, g].join(', '))
+  }
+
+  // Une proposition choisie remplit le titre, la couverture et le genre s'il est connu.
+  function pickSuggestion(s: Suggestion) {
+    setTitle(s.title)
+    if (s.cover) setCover(s.cover)
+    if (s.genres.length) setGenres(parseGenres([...current, ...s.genres].join(',')).join(', '))
   }
 
   function toggleList(id: number) {
@@ -80,10 +89,16 @@ export default function ItemForm({ item, defaultCategory, knownGenres, lists, on
           </select>
         </label>
 
-        <label className="field-label">
+        <div className="field-label">
           Titre
-          <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus={!item} />
-        </label>
+          <TitleAutocomplete
+            value={title}
+            category={category}
+            autoFocus={!item}
+            onChange={setTitle}
+            onPick={pickSuggestion}
+          />
+        </div>
 
         <div className="field-label">
           Couverture
