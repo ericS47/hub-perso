@@ -1,4 +1,5 @@
 import type { CultureCategory } from '../db'
+import { jsonp } from './suggest'
 
 export interface CoverHit {
   url: string
@@ -17,14 +18,20 @@ async function getJson(url: string, signal: AbortSignal) {
 
 async function itunes(q: string, media: string, entity: string, signal: AbortSignal): Promise<CoverHit[]> {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=${media}&entity=${entity}&country=fr&limit=8`
-  const data = await getJson(url, signal)
-  return (data.results ?? [])
-    .filter((r: { artworkUrl100?: string }) => r.artworkUrl100)
-    .map((r: { artworkUrl100: string; trackName?: string; collectionName?: string }) => ({
-      url: r.artworkUrl100.replace('100x100bb', '600x600bb'),
-      label: r.trackName ?? r.collectionName ?? q,
-      source: 'iTunes',
-    }))
+  const data = (await jsonp(url, signal)) as {
+    results?: { artworkUrl100?: string; trackName?: string; collectionName?: string }[]
+  }
+  return (data.results ?? []).flatMap((r) =>
+    r.artworkUrl100
+      ? [
+          {
+            url: r.artworkUrl100.replace('100x100bb', '600x600bb'),
+            label: r.trackName ?? r.collectionName ?? q,
+            source: 'iTunes',
+          },
+        ]
+      : [],
+  )
 }
 
 async function googleBooks(q: string, signal: AbortSignal): Promise<CoverHit[]> {

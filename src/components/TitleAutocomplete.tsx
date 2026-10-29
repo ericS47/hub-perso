@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { CultureCategory } from '../db'
-import { suggest, type Suggestion } from '../culture/suggest'
+import { suggest, type SourceStatus, type Suggestion } from '../culture/suggest'
 import { categoryOf } from '../culture/categories'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   onPick: (s: Suggestion) => void
 }
 
-type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'done'; list: Suggestion[]; failed: boolean }
+type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'done'; list: Suggestion[]; status: SourceStatus[] }
 
 // Champ titre qui propose des œuvres existantes dès la 3e lettre.
 export default function TitleAutocomplete({ value, category, autoFocus, onChange, onPick }: Props) {
@@ -33,7 +33,7 @@ export default function TitleAutocomplete({ value, category, autoFocus, onChange
       setState({ kind: 'loading' })
       const res = await suggest(category, q, ctrl.signal)
       if (ctrl.signal.aborted) return
-      setState({ kind: 'done', list: res.suggestions, failed: res.failed })
+      setState({ kind: 'done', list: res.suggestions, status: res.status })
       setActive(-1)
     }, 350)
     return () => {
@@ -104,8 +104,13 @@ export default function TitleAutocomplete({ value, category, autoFocus, onChange
           {state.kind === 'loading' && <p className="ac-note">Recherche…</p>}
           {state.kind === 'done' && list.length === 0 && (
             <p className="ac-note">
-              {state.failed ? 'Propositions indisponibles (hors ligne ?).' : 'Aucune proposition.'} Tu peux garder ton
-              titre tel quel.
+              Aucune proposition, tu peux garder ton titre tel quel.
+              <br />
+              {/* État de chaque source : aide à repérer celle qui ne répond pas. */}
+              <span className="small-text">
+                {state.status.map((s) => `${s.name} : ${s.ok ? `${s.count} résultat(s)` : 'erreur'}`).join(' · ')}
+                {!navigator.onLine && ' · hors ligne'}
+              </span>
             </p>
           )}
           {list.length > 0 && (
