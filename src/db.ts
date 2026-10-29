@@ -9,13 +9,22 @@ export interface Task {
 
 export type CultureCategory = 'films' | 'series' | 'jeux-societe' | 'jeux-video' | 'livres' | 'spectacles'
 
+// Possession : « Je l'ai » (dans ma collection), « Envie » (à acquérir) ou ni l'un ni l'autre.
+export type Ownership = 'owned' | 'wish' | 'none'
+
 export interface CultureItem {
   id?: number
   title: string
   category: CultureCategory
+  // Lien vers une image en ligne, ou photo importée stockée en data URL.
   cover?: string
+  // Vu, lu ou joué selon le type d'œuvre.
   seen: boolean
+  // Œuvre souvent conseillée : vignette mise en avant.
   priority: boolean
+  recommendedBy?: string
+  ownership: Ownership
+  genres: string[]
   listIds: number[]
   createdAt: number
 }
@@ -68,6 +77,20 @@ class HubDB extends Dexie {
       portfolios: '++id, createdAt',
       positions: '++id, portfolioId',
     })
+    this.version(4)
+      .stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+      })
+      .upgrade((tx) =>
+        tx.table('items').toCollection().modify((item: CultureItem) => {
+          item.ownership ??= 'none'
+          item.genres ??= []
+        }),
+      )
   }
 }
 

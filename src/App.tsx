@@ -4,8 +4,7 @@ import Home from './pages/Home'
 import Info from './pages/Info'
 import Emploi from './pages/Emploi'
 import Promo from './pages/Promo'
-import Culture from './pages/Culture'
-import Library from './pages/Library'
+import Culture, { ListRedirect } from './pages/Culture'
 import Finance from './pages/Finance'
 import Portfolio from './pages/Portfolio'
 import NotFound from './pages/NotFound'
@@ -17,8 +16,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/culture" element={<Culture />} />
-          <Route path="/culture/liste/:listId" element={<Library />} />
-          <Route path="/culture/:category" element={<Library />} />
+          <Route path="/culture/liste/:listId" element={<ListRedirect />} />
+          <Route path="/culture/:category" element={<Culture />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/finance/portefeuille" element={<Portfolio />} />
           <Route path="/info" element={<Info />} />
