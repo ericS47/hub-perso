@@ -1,8 +1,10 @@
 # Hub perso
 
-Application web progressive (PWA) qui regroupe au même endroit : culture, finance, info, emploi et promos, avec la météo, l'agenda et une liste de tâches sur l'accueil.
+Application web progressive (PWA) qui regroupe au même endroit : culture, finance, info, notes, emploi et promos, avec la météo, l'agenda et une liste de tâches sur l'accueil.
 
-Les données (tâches, bibliothèque culture, portefeuilles virtuels) restent sur l'appareil, dans le navigateur (IndexedDB). Rien n'est envoyé à un serveur.
+Les notes se rangent par étiquettes et sous-étiquettes, et peuvent être dictées (reconnaissance vocale du navigateur). Seule exception au « tout local » : pendant une dictée, le navigateur peut envoyer l'audio à son service de reconnaissance (Google sur Chrome, Apple sur Safari).
+
+Les données (tâches, bibliothèque culture, portefeuilles virtuels, notes) restent sur l'appareil, dans le navigateur (IndexedDB). Rien n'est envoyé à un serveur.
 
 ## Lancer en local
 

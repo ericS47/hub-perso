@@ -51,12 +51,33 @@ export interface Position {
   createdAt: number
 }
 
+// Étiquette de notes : parentId = 0 pour une étiquette racine, sinon l'id du parent
+// (sous-catégorie). 0 plutôt que null, car null n'est pas une clé IndexedDB.
+export interface NoteLabel {
+  id?: number
+  name: string
+  parentId: number
+  createdAt: number
+}
+
+// labelId = 0 : note sans étiquette.
+export interface Note {
+  id?: number
+  labelId: number
+  title: string
+  body: string
+  createdAt: number
+  updatedAt: number
+}
+
 class HubDB extends Dexie {
   tasks!: Table<Task, number>
   items!: Table<CultureItem, number>
   lists!: Table<CultureList, number>
   portfolios!: Table<Portfolio, number>
   positions!: Table<Position, number>
+  labels!: Table<NoteLabel, number>
+  notes!: Table<Note, number>
 
   constructor() {
     super('hub')
@@ -91,6 +112,16 @@ class HubDB extends Dexie {
           item.genres ??= []
         }),
       )
+    // Version 5 : étiquettes et notes (la version 4 est déjà installée sur les appareils).
+    this.version(5).stores({
+      tasks: '++id, done, createdAt',
+      items: '++id, category, createdAt, *listIds, *genres',
+      lists: '++id, createdAt',
+      portfolios: '++id, createdAt',
+      positions: '++id, portfolioId',
+      labels: '++id, parentId, createdAt',
+      notes: '++id, labelId, updatedAt',
+    })
   }
 }
 

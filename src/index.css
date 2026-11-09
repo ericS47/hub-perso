@@ -393,12 +393,52 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
   color: var(--text); text-decoration: none; font-size: 13px; font-weight: 700;
 }
 .ring-item:hover { background: var(--border); }
+/* Six pastilles tous les 60°, rayon 115 px autour du centre (177, 165). */
 .ring-pos-1 { left: 135px; top: 8px; }
-.ring-pos-2 { left: 244px; top: 88px; }
-.ring-pos-3 { left: 203px; top: 216px; }
-.ring-pos-4 { left: 67px; top: 216px; }
-.ring-pos-5 { left: 26px; top: 88px; }
+.ring-pos-2 { left: 235px; top: 66px; }
+.ring-pos-3 { left: 235px; top: 181px; }
+.ring-pos-4 { left: 135px; top: 238px; }
+.ring-pos-5 { left: 35px; top: 181px; }
+.ring-pos-6 { left: 35px; top: 66px; }
 
 
 .search-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .search-item:last-child { border-bottom: none; }
+
+.btn-block { width: 100%; margin-bottom: 12px; padding: 12px; font-size: 1rem; }
+.breadcrumb { font-size: 0.85rem; color: var(--muted); }
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+
+.label-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border);
+}
+.label-dot { width: 10px; height: 10px; border-radius: 50%; background: #facc15; flex: none; }
+.label-name { flex: 1; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.label-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.link-btn.danger { color: #f87171; }
+
+.note-row {
+  display: flex; flex-direction: column; gap: 2px; padding: 10px 0;
+  color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border);
+}
+.note-row-head { display: flex; justify-content: space-between; gap: 8px; }
+.note-row-head strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-excerpt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.note-editor { display: flex; flex-direction: column; gap: 12px; }
+.note-title, .note-body, .note-label-select select {
+  width: 100%; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font: inherit; font-size: 16px;
+}
+.note-title { padding: 12px 14px; font-size: 1.25rem; font-weight: 700; }
+.note-body { padding: 12px 14px; line-height: 1.5; resize: vertical; min-height: 240px; }
+.note-label-select { display: flex; flex-direction: column; gap: 4px; color: var(--muted); }
+.note-label-select select { padding: 10px 12px; }
+.note-interim { margin: 0; color: var(--muted); font-style: italic; }
+.note-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dictate { padding: 12px 18px; font-size: 1rem; }
+.dictate.listening { background: #f87171; animation: pulse 1.4s ease-in-out infinite; }
+.note-error { color: #f87171; margin: 0; }
+@keyframes pulse { 50% { opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) { .dictate.listening { animation: none; } }

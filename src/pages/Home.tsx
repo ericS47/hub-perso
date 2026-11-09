@@ -16,8 +16,9 @@ const modules = [
   { to: '/culture', label: 'Culture', color: '#a78bfa', pos: 1 },
   { to: '/finance', label: 'Finance', color: '#34d399', pos: 2 },
   { to: '/info', label: 'Info', color: '#f87171', pos: 3 },
-  { to: '/emploi', label: 'Emploi', color: '#60a5fa', pos: 4 },
-  { to: '/promo', label: 'Promo', color: '#fb923c', pos: 5 },
+  { to: '/notes', label: 'Notes', color: '#facc15', pos: 4 },
+  { to: '/emploi', label: 'Emploi', color: '#60a5fa', pos: 5 },
+  { to: '/promo', label: 'Promo', color: '#fb923c', pos: 6 },
 ]
 
 function Ring() {

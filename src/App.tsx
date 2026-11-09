@@ -8,6 +8,8 @@ import Culture from './pages/Culture'
 import Library from './pages/Library'
 import Finance from './pages/Finance'
 import Portfolio from './pages/Portfolio'
+import Notes from './pages/Notes'
+import NoteEditor from './pages/NoteEditor'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -24,6 +26,9 @@ export default function App() {
           <Route path="/info" element={<Info />} />
           <Route path="/emploi" element={<Emploi />} />
           <Route path="/promo" element={<Promo />} />
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/notes/etiquette/:labelId" element={<Notes />} />
+          <Route path="/notes/note/:noteId" element={<NoteEditor />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
