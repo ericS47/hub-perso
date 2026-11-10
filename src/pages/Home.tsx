@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Task } from '../db'
 import { useWeather } from '../hooks/useWeather'
-import { DEFAULT_CITY, weatherIcon } from '../weather'
+import { DEFAULT_CITY, weatherIcon, weatherLabel } from '../weather'
 
 // Données de démonstration, remplacées par Google Agenda une fois branché.
 const agendaPreview = [
@@ -11,54 +11,83 @@ const agendaPreview = [
   { time: '14:30', label: 'Séance APA' },
 ]
 
-// Pastilles autour de la météo : position sur le cercle (cf. maquette F).
+// Bulles autour de la météo, dans le sens des aiguilles d'une montre en partant du haut.
 const modules = [
-  { to: '/culture', label: 'Culture', color: '#a78bfa', pos: 1 },
-  { to: '/finance', label: 'Finance', color: '#34d399', pos: 2 },
-  { to: '/info', label: 'Info', color: '#f87171', pos: 3 },
-  { to: '/notes', label: 'Notes', color: '#facc15', pos: 4 },
-  { to: '/emploi', label: 'Emploi', color: '#60a5fa', pos: 5 },
-  { to: '/promo', label: 'Promo', color: '#fb923c', pos: 6 },
+  { to: '/culture', label: 'Culture', icon: '🎭', color: '#b98cff' },
+  { to: '/finance', label: 'Finance', icon: '📈', color: '#4fd18b' },
+  { to: '/emploi', label: 'Emploi', icon: '💼', color: '#5aa9ff' },
+  { to: '/promo', label: 'Promo', icon: '🏷️', color: '#ffa94d' },
+  { to: '/info', label: 'Info', icon: '🌍', color: '#ff6b6b' },
+  { to: '/notes', label: 'Notes', icon: '📝', color: '#e8b04a' },
 ]
 
+function dayName(iso: string, index: number) {
+  if (index === 1) return 'Demain'
+  return new Date(`${iso}T12:00`)
+    .toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })
+    .replace('.', '')
+}
+
 function Ring() {
-  const { place, forecast, error } = useWeather()
+  const { place, current, forecast, error } = useWeather()
   const today = forecast?.[0]
-  const tomorrow = forecast?.[1]
+  const next = forecast?.slice(1) ?? []
 
   return (
-    <div className="ring">
-      <div className="ring-outline" aria-hidden="true" />
+    <section className="orbit" aria-label="Météo et rubriques">
+      <div className="orbit-ring" aria-hidden="true" />
 
-      <div className="ring-center">
-        <span className="ring-place">{place?.name ?? DEFAULT_CITY}</span>
+      <div className="orbit-center" aria-live="polite">
+        <span className="oc-place">📍 {place?.name ?? DEFAULT_CITY}</span>
         {error ? (
-          <span className="muted small-text">{error}</span>
+          <span className="oc-desc">{error}</span>
+        ) : !current || !today ? (
+          <span className="oc-desc">Météo…</span>
         ) : (
           <>
-            <span className="ring-temp">
-              {today ? `${today.tempMax}°` : '…'}
-              {today && <span className="ring-icon" aria-hidden="true">{weatherIcon(today.code)}</span>}
+            <span className="oc-now">
+              <span className="oc-icon" aria-hidden="true">{weatherIcon(current.code)}</span>
+              <span className="oc-temp">{current.temp}°</span>
             </span>
-            {tomorrow && <span className="ring-tomorrow">Demain {tomorrow.tempMax}°</span>}
+            <span className="oc-desc">{weatherLabel(current.code)}</span>
+            <span className="oc-minmax">
+              <b>{today.tempMax}°</b> / {today.tempMin}°
+              {today.rain !== null && ` · 💧${today.rain}%`}
+            </span>
+            <span className="oc-days">
+              {next.map((d, i) => (
+                <span className="oc-day" key={d.date} title={weatherLabel(d.code)}>
+                  <span className="oc-day-name">{dayName(d.date, i + 1)}</span>
+                  <span className="oc-day-icon" aria-hidden="true">{weatherIcon(d.code)}</span>
+                  <span>
+                    <b>{d.tempMax}°</b> {d.tempMin}°
+                  </span>
+                </span>
+              ))}
+            </span>
           </>
         )}
-        <button type="button" className="ring-locate" disabled>
-          Me localiser
-        </button>
       </div>
 
-      {modules.map((m) => (
-        <Link
-          key={m.to}
-          to={m.to}
-          className={`ring-item ring-pos-${m.pos}`}
-          style={{ '--c': m.color } as React.CSSProperties}
-        >
-          {m.label}
-        </Link>
-      ))}
-    </div>
+      <nav className="orbit-items" aria-label="Rubriques">
+        {modules.map((m, i) => (
+          <Link
+            key={m.to}
+            to={m.to}
+            className="bubble"
+            style={
+              {
+                '--c': m.color,
+                '--angle': `${(360 / modules.length) * i - 90}deg`,
+              } as React.CSSProperties
+            }
+          >
+            <span className="bubble-icon" aria-hidden="true">{m.icon}</span>
+            <span className="bubble-label">{m.label}</span>
+          </Link>
+        ))}
+      </nav>
+    </section>
   )
 }
 
@@ -130,17 +159,30 @@ function Tasks() {
   )
 }
 
+function greeting(d: Date) {
+  const h = d.getHours()
+  if (h < 5) return 'Bonne nuit'
+  if (h < 12) return 'Bonjour'
+  if (h < 18) return 'Bon après-midi'
+  return 'Bonsoir'
+}
+
 export default function Home() {
   // Date figée à l'ouverture de la page : pas d'appel à Date pendant le rendu.
   const [now] = useState(() => new Date())
 
   return (
     <div className="home">
+      <div className="brand">
+        <img src={`${import.meta.env.BASE_URL}logo-m.png`} alt="" width="34" height="34" />
+        <span>MAESTRO</span>
+      </div>
       <header className="home-header">
         <div className="home-date">
           {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </div>
-        <h1>Bonjour</h1>
+        <h1>{greeting(now)} 👋</h1>
+        <p className="home-tagline">Le chef d’orchestre de ton quotidien</p>
       </header>
 
       <Ring />

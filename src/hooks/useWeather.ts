@@ -5,12 +5,14 @@ import {
   geocodeCity,
   getPosition,
   type Coords,
+  type CurrentWeather,
   type DayForecast,
 } from '../weather'
 
 // Météo de la ville par défaut, puis position actuelle si l'utilisateur le demande.
 export function useWeather() {
   const [place, setPlace] = useState<Coords | null>(null)
+  const [current, setCurrent] = useState<CurrentWeather | null>(null)
   const [forecast, setForecast] = useState<DayForecast[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [locating, setLocating] = useState(false)
@@ -23,7 +25,10 @@ export function useWeather() {
         if (!coords) throw new Error('Ville introuvable')
         if (cancelled) return
         setPlace(coords)
-        setForecast(await fetchForecast(coords.lat, coords.lon))
+        const f = await fetchForecast(coords.lat, coords.lon)
+        if (cancelled) return
+        setCurrent(f.current)
+        setForecast(f.days)
       } catch {
         if (!cancelled) setError('Météo indisponible')
       }
@@ -41,7 +46,9 @@ export function useWeather() {
       const pos = await getPosition()
       const { latitude: lat, longitude: lon } = pos.coords
       setPlace({ lat, lon, name: 'Ma position' })
-      setForecast(await fetchForecast(lat, lon))
+      const f = await fetchForecast(lat, lon)
+      setCurrent(f.current)
+      setForecast(f.days)
     } catch {
       setError('Localisation refusée ou indisponible')
     } finally {
@@ -49,5 +56,5 @@ export function useWeather() {
     }
   }
 
-  return { place, forecast, error, locating, locate }
+  return { place, current, forecast, error, locating, locate }
 }
