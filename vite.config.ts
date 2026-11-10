@@ -11,6 +11,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Enregistrement fait dans src/main.tsx (rechargement automatique à chaque nouvelle version).
+      injectRegister: false,
       includeAssets: ['favicon.ico', 'favicon-32.png', 'apple-touch-icon.png', 'logo-m.png'],
       manifest: {
         name: 'Maestro',
@@ -34,7 +36,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
         // Couvertures en ligne gardées en cache : la bibliothèque reste illustrée hors ligne.
         runtimeCaching: [
           {
