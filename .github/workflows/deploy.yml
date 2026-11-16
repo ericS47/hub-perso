@@ -23,10 +23,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            compagnon/package-lock.json
       - run: npm ci
       - run: npm run build
       # Les liens directs (ex. /hub-perso/culture) renvoient vers l'app grâce à cette copie.
       - run: cp dist/index.html dist/404.html
+      # Seconde appli (accompagnement des patients), publiée sous /hub-perso/compagnon/.
+      - run: npm ci && npm run build
+        working-directory: compagnon
+      - run: cp -r compagnon/dist dist/compagnon
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
