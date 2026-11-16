@@ -142,3 +142,5 @@ fieldset { border: none; padding: 0; margin: 0 0 14px; min-width: 0; }
 .demo-note { border-left: 4px solid var(--sun); background: #fdf5e0; padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 12px; }
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+a { color: var(--accent); }
