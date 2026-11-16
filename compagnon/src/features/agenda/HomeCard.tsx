@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Session } from '../../db'
 import { addDays, isoDate, startOfWeek, weekday } from '../../lib/dates'
 import { sortSessions } from './hooks'
-import { activityEmoji, displayState, formatDuration, relativeDay, timeRange, useNow } from './lib'
+import { activityEmoji, displayState, formatDuration, formatTime, relativeDay, timeRange, useNow } from './lib'
 import { DoneButtons, IcsButton, SessionFlow, type FlowMode } from './Sheets'
 import './agenda.css'
 
@@ -81,7 +81,7 @@ export default function HomeCard() {
               <li key={s.id} className="agenda-home-fill-item">
                 <p>
                   <span aria-hidden="true">{activityEmoji(s.activity)} </span>
-                  <strong>{s.activity}</strong> · {relativeDay(s.date, today)} à {s.start.replace(':', ' h ')}
+                  <strong>{s.activity}</strong> · {relativeDay(s.date, today)} à {formatTime(s.start)}
                 </p>
                 <DoneButtons onPick={open(s)} compact />
               </li>

@@ -12,6 +12,7 @@ import {
   constraintsOn,
   downloadIcs,
   formatDuration,
+  formatTime,
   longDay,
   minStartFor,
   overlaps,
@@ -153,7 +154,7 @@ export default function Plan() {
               {inWeek.map((s) => (
                 <li key={s.id}>
                   <span aria-hidden="true">{activityEmoji(s.activity)} </span>
-                  {s.activity}, {longDay(s.date)} à {s.start.replace(':', ' h ')}
+                  {s.activity}, {longDay(s.date)} à {formatTime(s.start)}
                 </li>
               ))}
             </ul>

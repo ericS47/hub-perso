@@ -275,6 +275,26 @@ function vevent(s: Session, beforeMin: number): string[] {
   ]
 }
 
+// Repli des lignes à 75 octets (RFC 5545), sans couper un caractère UTF-8.
+function fold(line: string): string {
+  const enc = new TextEncoder()
+  const out: string[] = []
+  let cur = ''
+  let bytes = 0
+  for (const ch of line) {
+    const n = enc.encode(ch).length
+    if (bytes + n > (out.length ? 74 : 75)) {
+      out.push(cur)
+      cur = ''
+      bytes = 0
+    }
+    cur += ch
+    bytes += n
+  }
+  out.push(cur)
+  return out.join('\r\n ')
+}
+
 export function downloadIcs(sessions: Session[], beforeMin: number, filename: string): void {
   const lines = [
     'BEGIN:VCALENDAR',
@@ -285,7 +305,7 @@ export function downloadIcs(sessions: Session[], beforeMin: number, filename: st
     ...sessions.flatMap((s) => vevent(s, beforeMin)),
     'END:VCALENDAR',
   ]
-  const blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' })
+  const blob = new Blob([lines.map(fold).join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

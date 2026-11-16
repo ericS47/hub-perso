@@ -21,7 +21,7 @@ import {
 import { DoneButtons, SessionFlow, SessionSheet, type FlowMode } from './Sheets'
 
 // Résumé encourageant de la semaine (jamais « 0 sur 3 »).
-function summary(sessions: Session[], now: Date, monday: string): { title: string; detail?: string } {
+function summary(sessions: Session[], now: Date, monday: string, current: boolean): { title: string; detail?: string } {
   const states = sessions.map((s) => displayState(s, now))
   const total = sessions.length
   const done = states.filter((s) => s === 'faite').length
@@ -37,7 +37,7 @@ function summary(sessions: Session[], now: Date, monday: string): { title: strin
     const tail = upcoming ? ` Encore ${pl(upcoming, 'séance')} à venir, à ton rythme.` : past ? ' Chaque séance compte.' : ''
     return { title: `${done} séance${done > 1 ? 's' : ''} sur ${total} ${done > 1 ? 'faites' : 'faite'} 💪`, detail: [detail, tail.trim()].filter(Boolean).join(' ') }
   }
-  if (upcoming === total) return { title: `${pl(total, 'séance')} ${total > 1 ? 'prévues' : 'prévue'} cette semaine`, detail: 'Belle organisation, tu as fait le plus dur : te donner rendez-vous.' }
+  if (upcoming === total) return { title: `${pl(total, 'séance')} ${total > 1 ? 'prévues' : 'prévue'}${current ? ' cette semaine' : ''}`, detail: 'Belle organisation, tu as fait le plus dur : te donner rendez-vous.' }
   if (upcoming > 0) return { title: `${pl(upcoming, 'séance')} encore à venir`, detail: 'Chaque nouvelle séance est une nouvelle occasion.' }
   if (toFill > 0) return { title: `${pl(toFill, 'séance')} à compléter`, detail: 'Dis-moi comment ça s’est passé, quelle que soit la réponse.' }
   return { title: 'Cette semaine n’a pas été simple, et c’est OK', detail: 'La suivante est une page blanche.' }
@@ -87,7 +87,7 @@ export default function Week() {
 
   if (!sessions || !constraints) return <PageShell title="Mon agenda">{null}</PageShell>
 
-  const sum = sessions.length ? summary(sessions, now, monday) : null
+  const sum = sessions.length ? summary(sessions, now, monday, isCurrent) : null
 
   return (
     <PageShell title="Mon agenda" subtitle="Mes séances d'activité physique">

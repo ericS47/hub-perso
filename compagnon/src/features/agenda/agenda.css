@@ -74,6 +74,7 @@
 
 /* Panneaux */
 .agenda-detail-when { font-size: 1.02rem; }
+.agenda-detail-when strong { display: inline-block; }
 .agenda-detail-when strong::first-letter { text-transform: uppercase; }
 .agenda-detail-actions { margin-top: 14px; }
 .agenda-note { font-style: italic; background: var(--surface-2); padding: 8px 12px; border-radius: 10px; }
@@ -183,3 +184,4 @@
 .agenda-home-fill h3 { color: #a5522c; }
 .agenda-home-fill-item { background: var(--warm-soft); border-radius: 12px; padding: 10px; }
 .agenda-home-fill-item p { margin: 0; }
+.agenda-toggle .muted { display: block; font-weight: 400; }

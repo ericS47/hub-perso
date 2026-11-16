@@ -6,6 +6,7 @@ import Agenda from './features/agenda'
 import Compagnon from './features/compagnon'
 import Jeux from './features/jeux'
 import Plus from './features/plus'
+import { ReminderRunner } from './features/agenda/reminders'
 
 // Chaque fonctionnalité gère ses propres sous-routes (voir src/features/*/index.tsx).
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
+      <ReminderRunner />
       <BottomNav />
     </div>
   )
