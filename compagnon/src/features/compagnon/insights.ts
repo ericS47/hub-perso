@@ -33,6 +33,9 @@ const ARTICLE: Record<string, string> = {
 }
 const withArticle = (e: string) => ARTICLE[e] ?? `« ${e} »`
 
+// Nombre à une décimale, à la française (5,1).
+const fr = (n: number) => (Math.round(n * 10) / 10).toLocaleString('fr-FR')
+
 function count(items: string[]): [string, number][] {
   const m = new Map<string, number>()
   for (const i of items) m.set(i, (m.get(i) ?? 0) + 1)
@@ -149,7 +152,7 @@ export function observe(entries: JournalEntry[], moods: MoodCheck[], t: T): { ob
   }
 
   if (moods.length >= MIN_ENTREES) {
-    const avg = (k: 'moral' | 'fatigue' | 'stress') => Math.round((moods.reduce((s, m) => s + m[k], 0) / moods.length) * 10) / 10
+    const avg = (k: 'moral' | 'fatigue' | 'stress') => fr(moods.reduce((s, m) => s + m[k], 0) / moods.length)
     obs.push({
       emoji: '🌤️',
       text: t(
@@ -188,7 +191,7 @@ export function rdvSummary(opts: {
   lines.push(`Activité physique : ${sessions.length} séance(s) prévue(s), ${faites.length} faite(s), ${manquees.length} manquée(s).`)
   const avgOf = (k: 'envie' | 'motivation' | 'plaisir') => {
     const v = faites.map((s) => s[k]).filter((x): x is number => typeof x === 'number')
-    return v.length ? `${Math.round((v.reduce((a, b) => a + b, 0) / v.length) * 10) / 10}/10` : null
+    return v.length ? `${fr(v.reduce((a, b) => a + b, 0) / v.length)}/10` : null
   }
   const ev = (['envie', 'motivation', 'plaisir'] as const).map((k) => (avgOf(k) ? `${k} ${avgOf(k)}` : null)).filter(Boolean)
   if (ev.length) lines.push(`Après les séances, en moyenne : ${ev.join(', ')}.`)
@@ -201,7 +204,7 @@ export function rdvSummary(opts: {
   const emo = count(food.flatMap((e) => e.emotions.map((x) => x.toLowerCase())))
   if (emo.length) lines.push(`Émotions notées avant : ${emo.slice(0, 5).map(([r, n]) => `${r} (${n})`).join(', ')}.`)
   const intens = food.map((e) => e.intensity).filter((x): x is number => typeof x === 'number')
-  if (intens.length) lines.push(`Intensité moyenne : ${Math.round((intens.reduce((a, b) => a + b, 0) / intens.length) * 10) / 10}/10.`)
+  if (intens.length) lines.push(`Intensité moyenne : ${fr(intens.reduce((a, b) => a + b, 0) / intens.length)}/10.`)
   const essais = count(answersOf(food, 'À essayer la prochaine fois'))
   if (essais.length) lines.push(`Pistes que j’ai envie d’essayer : ${essais.slice(0, 4).map(([r]) => r).join(', ')}.`)
   lines.push('')
@@ -210,7 +213,7 @@ export function rdvSummary(opts: {
   const pese = count(answersOf(by('coup-de-mou'), 'Ce qui pèse'))
   if (pese.length) lines.push(`Ce qui pèse : ${pese.slice(0, 4).map(([r, n]) => `${r} (${n})`).join(', ')}.`)
   if (moods.length) {
-    const avg = (k: 'moral' | 'fatigue' | 'stress') => Math.round((moods.reduce((s, m) => s + m[k], 0) / moods.length) * 10) / 10
+    const avg = (k: 'moral' | 'fatigue' | 'stress') => fr(moods.reduce((s, m) => s + m[k], 0) / moods.length)
     lines.push(`Météo intérieure (${moods.length} jour(s)) : moral ${avg('moral')}/10, fatigue ${avg('fatigue')}/10, stress ${avg('stress')}/10.`)
   }
   const good = entries.filter(isBonneNouvelle).length

@@ -55,7 +55,14 @@ function buildEntry(script: ScriptId, exchanges: Exchange[], sessionId?: number)
   }
 }
 
-export default function Talk() {
+// Une nouvelle conversation repart de zéro quand le sujet ou la séance change.
+export default function TalkPage() {
+  const { type } = useParams()
+  const [params] = useSearchParams()
+  return <Talk key={`${type}-${params.get('seance') ?? ''}`} />
+}
+
+function Talk() {
   const { type } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
@@ -216,7 +223,7 @@ export default function Talk() {
           </div>
         </div>
       )}
-      <div ref={endRef} />
+      <div ref={endRef} className="compagnon-end" />
 
       {askStop && (
         <Sheet title="On s’arrête là ?" onClose={() => setAskStop(false)}>

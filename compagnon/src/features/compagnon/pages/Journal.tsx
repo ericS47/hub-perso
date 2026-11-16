@@ -135,7 +135,7 @@ function EntryList({ entries, t, onDelete }: { entries: JournalEntry[]; t: T; on
 }
 
 function Remarks({ entries, t, name }: { entries: JournalEntry[]; t: T; name: string }) {
-  const since = Date.now() - 60 * 86400000
+  const [since] = useState(() => Date.now() - 60 * 86400000)
   const moods = useLiveQuery(() => db.moods.where('date').aboveOrEqual(addDays(isoDate(), -13)).toArray(), [])
   if (!moods) return null
   const recent = entries.filter((e) => e.createdAt >= since)

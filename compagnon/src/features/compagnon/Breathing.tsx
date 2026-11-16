@@ -16,6 +16,14 @@ export default function Breathing({ t, onClose }: Props) {
   const [running, setRunning] = useState(false)
   const [elapsed, setElapsed] = useState(0)
 
+  // Laisse le cercle partir « petit » pour que la première inspiration soit animée.
+  const [armed, setArmed] = useState(false)
+  useEffect(() => {
+    if (!running) return
+    const a = window.setTimeout(() => setArmed(true), 60)
+    return () => window.clearTimeout(a)
+  }, [running])
+
   useEffect(() => {
     if (!running) return
     const id = window.setInterval(() => setElapsed((e) => e + 1), 1000)
@@ -63,7 +71,7 @@ export default function Breathing({ t, onClose }: Props) {
       ) : (
         <div className="compagnon-center">
           <div className="compagnon-breath-stage" aria-hidden="true">
-            <div className={inhale ? 'compagnon-breath-circle in' : 'compagnon-breath-circle out'} />
+            <div className={inhale && armed ? 'compagnon-breath-circle in' : 'compagnon-breath-circle out'} />
           </div>
           <p className="compagnon-breath-label" aria-live="polite">
             {inhale ? t('Inspire…', 'Inspirez…') : t('Expire…', 'Expirez…')}

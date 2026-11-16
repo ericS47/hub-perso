@@ -18,6 +18,8 @@ export function safetyTurn(state: ConversationState): Turn {
   const t = makeT(state.context.voice.tutoiement)
   const already = state.exchanges.some((e) => e.turnId === SAFETY_TURN)
   const prenom = state.context.voice.firstName
+  const last = state.exchanges[state.exchanges.length - 1]
+  const viaTexte = texteInquietant(last?.answer.text)
   return {
     id: SAFETY_TURN,
     tone: 'safety',
@@ -46,10 +48,15 @@ export function safetyTurn(state: ConversationState): Turn {
         'Si tu es en danger maintenant, appelle le 15 ou le 112. Et si tu le peux, préviens ton soignant ou un proche : tu n’as pas à porter ça sans personne.',
         'Si vous êtes en danger maintenant, appelez le 15 ou le 112. Et si vous le pouvez, prévenez votre soignant ou un proche : vous n’avez pas à porter ça sans personne.',
       ),
-      t(
-        'Si j’ai mal compris, tant mieux. On peut reprendre où on en était, ou s’arrêter là, comme tu préfères.',
-        'Si j’ai mal compris, tant mieux. On peut reprendre où on en était, ou s’arrêter là, comme vous préférez.',
-      ),
+      viaTexte
+        ? t(
+            'Si j’ai mal compris, tant mieux. On peut reprendre où on en était, ou s’arrêter là, comme tu préfères.',
+            'Si j’ai mal compris, tant mieux. On peut reprendre où on en était, ou s’arrêter là, comme vous préférez.',
+          )
+        : t(
+            'Je reste là. On peut continuer à parler ensemble, ou s’arrêter là, comme tu préfères.',
+            'Je reste là. On peut continuer à parler ensemble, ou s’arrêter là, comme vous préférez.',
+          ),
     ],
     actions: [
       ...NUMEROS_AIDE.map((n) => ({ kind: 'tel' as const, number: n.numero, label: n.titre, detail: n.detail })),

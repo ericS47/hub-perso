@@ -60,7 +60,9 @@ export function ReminderRunner() {
 
   const [dismissed, setDismissed] = useState<string[]>(() => readSet(DISMISSED))
 
-  if (!welcomeDone || location.pathname.startsWith('/compagnon/bienvenue')) return null
+  // Pas de bandeau pendant l'accueil, une conversation ou une partie : il couvrirait la zone de réponse.
+  const quiet = ['/compagnon/bienvenue', '/compagnon/parler', '/jeux/'].some((p) => location.pathname.startsWith(p))
+  if (!welcomeDone || quiet) return null
   const order = { seance: 0, planning: 1, encouragement: 2 }
   const shown = active
     .filter((r) => !dismissed.includes(r.key))

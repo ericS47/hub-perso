@@ -116,6 +116,7 @@ function Robot({ color, mood }: { color: string; mood: Mood }) {
   const light = shade(color, 0.6)
   return (
     <g>
+      <rect x={43} y={70} width={14} height={12} rx={3} fill={mid} />
       <rect x={30} y={79} width={40} height={30} rx={10} fill={color} />
       <circle cx={50} cy={90} r={4} fill="#f2b84b" />
       <line x1={50} y1={14} x2={50} y2={25} stroke={dark} strokeWidth={2.5} strokeLinecap="round" />
@@ -160,8 +161,8 @@ function Animal({ color, mood }: { color: string; mood: Mood }) {
   const ink = shade(color, -0.75)
   return (
     <g>
-      <ellipse cx={50} cy={97} rx={26} ry={16} fill={color} />
-      <ellipse cx={50} cy={98} rx={12} ry={12} fill={cream} />
+      <ellipse cx={50} cy={93} rx={27} ry={16} fill={color} />
+      <ellipse cx={50} cy={96} rx={12} ry={12} fill={cream} />
       <path d="M23 42 L27 9 L47 28 Z" fill={color} strokeLinejoin="round" stroke={color} strokeWidth={3} />
       <path d="M29 34 L30.5 18 L41 28 Z" fill={inner} />
       <path d="M77 42 L73 9 L53 28 Z" fill={color} strokeLinejoin="round" stroke={color} strokeWidth={3} />
