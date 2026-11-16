@@ -44,7 +44,7 @@ export const libre: Script = {
                 `Si je résume : tu as pris le temps d’écrire ce qui te traversait${e ? `, avec ${e}` : ''}.`,
                 `Si je résume : vous avez pris le temps d’écrire ce qui vous traversait${e ? `, avec ${e}` : ''}.`,
               )
-            : c.t('Merci d’être passé par ici, même sans écrire beaucoup.', 'Merci d’être passé par ici, même sans écrire beaucoup.').replace('d’être passé par ici', 'de ce petit passage'),
+            : c.t('Merci pour ce petit passage, même sans écrire beaucoup.', 'Merci pour ce petit passage, même sans écrire beaucoup.'),
           [
             c.t('Écrire, c’est une belle façon de prendre soin de soi.', 'Écrire, c’est une belle façon de prendre soin de soi.'),
             c.t('Tu pourras relire ces mots plus tard, et voir le chemin parcouru.', 'Vous pourrez relire ces mots plus tard, et voir le chemin parcouru.'),

@@ -1,4 +1,5 @@
-import { Choice, Multi, NumberField, OFTEN_OPTIONS, SubBlock, TextField, YesNo } from '../fields'
+import { Choice, Multi, NumberField, SubBlock, TextField, YesNo } from '../fields'
+import { OFTEN_OPTIONS } from '../utils'
 import Plateau from '../Plateau'
 import { useSectionEditor } from '../store'
 import Wizard, { type Step } from '../Wizard'

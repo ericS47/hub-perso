@@ -91,12 +91,10 @@ function TrayDrawing({ meal }: { meal: Meal }) {
   const shares = meal.plate
   const cx = 160
   const cy = 112
-  let acc = 0
   const wedges = shares
-    ? PARTS.map((p) => {
-        const from = acc
-        acc += shares[p.key]
-        return { ...p, from, to: acc, value: shares[p.key] }
+    ? PARTS.map((p, n) => {
+        const from = PARTS.slice(0, n).reduce((t, q) => t + shares[q.key], 0)
+        return { ...p, from, to: from + shares[p.key], value: shares[p.key] }
       }).filter((w) => w.value > 0)
     : []
   const desc = meal.skipped

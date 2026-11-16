@@ -277,7 +277,7 @@ function make(k: Kind): Script {
         actions: (c) => {
           const acts: TurnAction[] = []
           if (c.values('essayer').includes('respirer')) acts.push({ kind: 'breathing', label: '🌬️ Essayer la respiration maintenant' })
-          if (frequent(c, k) || forteDetresse(c)) acts.push({ kind: 'link', to: '/plus/pros', label: 'Voir mon équipe soignante' })
+          if (frequent(c, k) || forteDetresse(c)) acts.push({ kind: 'link', to: '/plus/pros?besoin=alimentation', label: 'Voir mon équipe soignante' })
           return acts
         },
       },

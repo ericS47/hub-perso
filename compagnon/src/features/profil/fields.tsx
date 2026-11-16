@@ -53,12 +53,6 @@ export function Multi<T extends string>({ label, options, value, onChange }: Mul
   return <Chips label={label} options={options} value={value ?? []} onChange={(v) => onChange(toggleIn(value, v))} />
 }
 
-export const OFTEN_OPTIONS = [
-  { value: 'oui' as const, label: 'Oui' },
-  { value: 'parfois' as const, label: 'Parfois' },
-  { value: 'non' as const, label: 'Non' },
-]
-
 interface TextProps {
   label: string
   value: string | undefined

@@ -148,7 +148,7 @@ export const seanceManquee: Script = {
               'Si elle dure, revient ou vous inquiète, parlez-leur-en : ils pourront adapter vos séances pour que vous bougiez sans vous faire mal.',
             ),
       ],
-      actions: () => [{ kind: 'link', to: '/plus/pros', label: 'Contacter mon équipe' }],
+      actions: () => [{ kind: 'link', to: '/plus/pros?besoin=douleur', label: 'Contacter mon équipe' }],
       input: {
         kind: 'choice',
         options: [
@@ -336,7 +336,7 @@ export const seanceManquee: Script = {
       actions: (c) => {
         const acts: { kind: 'link'; to: string; label: string }[] = []
         if (c.value('pas') === 'replacer') acts.push({ kind: 'link', to: '/agenda', label: '📅 Ouvrir l’agenda' })
-        if (c.value('accueil') === 'douleur') acts.push({ kind: 'link', to: '/plus/pros', label: 'Contacter mon équipe' })
+        if (c.value('accueil') === 'douleur') acts.push({ kind: 'link', to: '/plus/pros?besoin=douleur', label: 'Contacter mon équipe' })
         return acts
       },
     },

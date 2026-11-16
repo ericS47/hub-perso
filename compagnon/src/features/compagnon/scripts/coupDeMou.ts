@@ -258,7 +258,7 @@ export const coupDeMou: Script = {
         const acts: TurnAction[] = []
         if (choix === 'jeu') acts.push({ kind: 'link', to: '/jeux', label: '🎲 Aller aux jeux' })
         if (choix === 'respirer') acts.push({ kind: 'breathing', label: '🌬️ Refaire la respiration' })
-        if ((c.num('moral') ?? 10) <= 4) acts.push({ kind: 'link', to: '/plus/pros', label: 'Voir mon équipe soignante' })
+        if ((c.num('moral') ?? 10) <= 4) acts.push({ kind: 'link', to: '/plus/pros?besoin=moral', label: 'Voir mon équipe soignante' })
         if (choix === 'raisons' && !c.context.attentes.length) acts.push({ kind: 'link', to: '/profil', label: 'Compléter mon profil' })
         return acts
       },

@@ -102,7 +102,8 @@ export function saveProfileSection<K extends ProfileSectionId>(id: K, data: Sect
     db.transaction('rw', db.profile, db.constraints, async () => {
       await db.profile.put({ section: id, data, done, updatedAt: Date.now() })
       // Travail et foyer : on remplace toutes les contraintes de leurs sources (jamais de doublons).
-      const sources = id === 'travail' || id === 'foyer' ? CONSTRAINT_SOURCES[id] : undefined
+      const sid: ProfileSectionId = id
+      const sources = sid === 'travail' || sid === 'foyer' ? CONSTRAINT_SOURCES[sid] : undefined
       if (sources) {
         const rows =
           id === 'travail'

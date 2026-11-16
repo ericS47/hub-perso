@@ -157,18 +157,16 @@ export function choixIA(tirs: (Resultat | null)[], taille: number, rng: Rng = Ma
         const nx = x + dx
         const ny = y + dy
         if (nx < taille && ny < taille && tirs[ny * taille + nx] === 'touche') {
-          // Remonte la ligne dans les deux sens jusqu'à une case libre.
-          for (const sens of [-1, 1]) {
-            let k = sens === 1 ? 1 : 0
+          // Parcourt la ligne dans les deux sens jusqu'à la première case non touchée.
+          for (const s of [-1, 1]) {
+            let cx = x
+            let cy = y
             for (;;) {
-              const cx = x + dx * k * (sens === 1 ? 1 : -1) + (sens === -1 ? -dx : 0)
-              const cy = y + dy * k * (sens === 1 ? 1 : -1) + (sens === -1 ? -dy : 0)
+              cx += dx * s
+              cy += dy * s
               if (cx < 0 || cy < 0 || cx >= taille || cy >= taille) break
               const c = cy * taille + cx
-              if (tirs[c] === 'touche') {
-                k++
-                continue
-              }
+              if (tirs[c] === 'touche') continue
               if (tirs[c] === null) alignees.push(c)
               break
             }

@@ -58,7 +58,7 @@ export function safetyTurn(state: ConversationState): Turn {
         label: t('Prévenir un proche', 'Prévenir un proche'),
         text: 'Je traverse un moment difficile. Est-ce que tu peux m’appeler quand tu vois ce message ?',
       },
-      { kind: 'link', to: '/plus/pros', label: t('Contacter mon équipe soignante', 'Contacter mon équipe soignante') },
+      { kind: 'link', to: '/plus/pros?besoin=moral', label: t('Contacter mon équipe soignante', 'Contacter mon équipe soignante') },
     ],
     input: {
       kind: 'choice',
