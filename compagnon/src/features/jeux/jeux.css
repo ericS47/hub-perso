@@ -1,0 +1,233 @@
+/* Jeux : toutes les classes sont préfixées par .jeux- */
+
+/* ── Illustrations ── */
+.jeux-figure { display: block; overflow: visible; }
+.jeux-fig-a.anime { animation: jeux-alt-a 2.4s steps(1) infinite; }
+.jeux-fig-b { opacity: 0; animation: jeux-alt-b 2.4s steps(1) infinite; }
+@keyframes jeux-alt-a { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes jeux-alt-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+.jeux-souffle { animation: jeux-souffle 2.4s ease-in-out infinite; }
+@keyframes jeux-souffle { 0%, 100% { opacity: 0; transform: translateX(-3px); } 50% { opacity: 0.7; transform: translateX(2px); } }
+
+/* ── Accueil ── */
+.jeux-liste { display: grid; gap: 10px; margin-bottom: 12px; }
+a.jeux-tuile { display: flex; gap: 14px; align-items: center; padding: 12px; margin: 0; transition: transform 0.15s; }
+a.jeux-tuile:active { transform: scale(0.98); }
+.jeux-tuile-fig { flex: none; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 14px; }
+.jeux-tuile-txt { display: flex; flex-direction: column; gap: 2px; }
+.jeux-tuile-txt strong { font-size: 1.08rem; }
+.jeux-bilan { display: flex; justify-content: space-around; text-align: center; gap: 8px; }
+.jeux-stat { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.jeux-stat strong { font-size: 1.7rem; line-height: 1.1; color: var(--accent); }
+.jeux-stat span { font-size: 0.8rem; color: var(--muted); line-height: 1.2; }
+.jeux-historique, .jeux-externes { list-style: none; margin: 0; padding: 0; }
+.jeux-historique li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); }
+.jeux-historique li:first-child { border-top: none; }
+.jeux-externes a { display: flex; gap: 12px; align-items: center; min-height: 52px; padding: 8px 0; color: inherit; text-decoration: none; }
+.jeux-externes a > span:last-child { display: flex; flex-direction: column; }
+
+/* ── Préparation ── */
+.jeux-regles summary { font-weight: 700; cursor: pointer; min-height: 32px; }
+.jeux-regles-corps ul, .jeux-regles-corps ol { margin: 8px 0 0; padding-left: 20px; }
+.jeux-regles-corps li + li { margin-top: 4px; }
+.jeux-switch { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; margin-bottom: 14px; cursor: pointer; }
+.jeux-switch input { width: 24px; height: 24px; flex: none; margin: 2px 0 0; accent-color: var(--accent); }
+.jeux-niveau-detail { margin-top: -6px; }
+.jeux-securite { display: flex; gap: 10px; align-items: flex-start; background: #fdf5e0; border-left: 4px solid var(--sun); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.92rem; }
+.jeux-securite p { margin: 0; }
+.jeux-securite span { font-size: 1.4rem; line-height: 1; }
+.jeux-go { min-height: 54px; font-size: 1.1rem; margin-top: 4px; }
+.jeux-noms { display: grid; gap: 0; }
+.jeux-nom > span { display: flex; align-items: center; gap: 8px; }
+.jeux-pastille { display: inline-block; width: 14px; height: 14px; border-radius: 50%; flex: none; vertical-align: middle; margin-right: 6px; }
+
+/* ── Carte exercice (plein écran) ── */
+.jeux-overlay {
+  position: fixed; inset: 0; z-index: 30;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(34, 48, 47, 0.5);
+  animation: jeux-fondu 0.2s ease-out;
+}
+@keyframes jeux-fondu { from { opacity: 0; } }
+.jeux-carte-ex, .jeux-evenement {
+  width: 100%; max-width: 520px; max-height: 100dvh; overflow-y: auto;
+  background: var(--surface); border-radius: 22px 22px 0 0;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  animation: jeux-monte 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+@keyframes jeux-monte { from { transform: translateY(40%); opacity: 0; } }
+.jeux-carte-contexte { padding: 12px 16px 0; font-size: 0.92rem; color: var(--muted); }
+.jeux-carte-contexte strong { color: var(--text); }
+.jeux-carte-tete { position: relative; display: flex; justify-content: center; margin: 10px 16px 0; border-radius: 16px; padding: 6px 0 4px; }
+.jeux-cat { position: absolute; left: 10px; top: 8px; font-size: 0.8rem; font-weight: 700; background: rgba(255, 255, 255, 0.8); padding: 2px 8px; border-radius: 999px; }
+.jeux-carte-corps { padding: 10px 16px 0; text-align: center; }
+.jeux-carte-corps h2 { font-size: 1.4rem; margin-bottom: 4px; outline: none; }
+.jeux-carte-joueur { font-weight: 700; color: var(--warm); margin-bottom: 2px; }
+.jeux-consigne { font-size: 1.05rem; }
+.jeux-quantite { display: inline-block; font-weight: 700; background: var(--surface-2); padding: 4px 12px; border-radius: 999px; }
+.jeux-compteur { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 0 4px; }
+.jeux-compteur > svg { display: block; }
+.jeux-anneau { transition: stroke-dashoffset 1s linear; }
+.jeux-compteur-val { position: absolute; top: 44px; left: 0; right: 0; font-size: 1.6rem; font-weight: 800; }
+.jeux-compteur-note { font-size: 0.85rem; color: var(--muted); margin: 0; min-height: 1.2em; }
+.jeux-tap {
+  width: 120px; height: 120px; border-radius: 50%; border: 6px solid; background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font: inherit;
+  transition: transform 0.1s;
+}
+.jeux-tap:active { transform: scale(0.94); }
+.jeux-tap-n { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+.jeux-tap-sur { font-size: 0.85rem; color: var(--muted); }
+.jeux-carte-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; margin-top: 10px; }
+.jeux-carte-actions .btn { min-height: 56px; font-size: 1.1rem; }
+.jeux-btn-fait { background: var(--ok); }
+.jeux-carte-pied { margin: 8px 0 0; font-size: 0.82rem; }
+
+.jeux-evenement { padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); text-align: center; font-size: 1.05rem; }
+.jeux-evenement-emoji { font-size: 3rem; line-height: 1; margin-bottom: 8px; animation: jeux-hop 0.6s ease-out; }
+@keyframes jeux-hop { 0% { transform: scale(0.4); } 60% { transform: scale(1.15); } }
+
+/* ── Fin de partie ── */
+.jeux-fin { text-align: center; }
+.jeux-fin-trophee { font-size: 3.4rem; line-height: 1; animation: jeux-hop 0.7s ease-out; }
+.jeux-fin-titre { font-size: 1.5rem; margin: 6px 0; }
+.jeux-fin-sous { font-weight: 600; }
+.jeux-fin-stats { display: flex; justify-content: center; gap: 22px; margin: 16px 0; }
+.jeux-fin-message { font-size: 1.05rem; }
+.jeux-fin-seance { text-align: left; }
+.jeux-fin .btn-row { justify-content: center; }
+.jeux-classement { text-align: left; display: inline-block; margin: 0 auto; padding-left: 22px; }
+
+/* ── Joueurs (bandeau) ── */
+.jeux-joueurs { list-style: none; padding: 0; margin: 0 0 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.jeux-joueurs li {
+  display: flex; align-items: center; gap: 2px; flex: 1 1 40%;
+  padding: 6px 10px; border-radius: 12px; border: 2px solid transparent; background: var(--surface);
+  font-size: 0.9rem; opacity: 0.7; transition: opacity 0.2s;
+}
+.jeux-joueurs li.on { opacity: 1; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+.jeux-joueurs li span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jeux-joueurs small { color: var(--muted); font-weight: 400; }
+
+/* ── Jeu de l'oie ── */
+.jeux-oie-plateau { display: block; width: 100%; height: auto; background: #fbf7f0; border-radius: 16px; border: 1px solid var(--border); }
+.jeux-pion { transition: transform 0.24s ease-in-out; }
+.jeux-pion-halo { animation: jeux-halo 1.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes jeux-halo { 50% { transform: scale(1.3); opacity: 0.3; } }
+.jeux-legende { margin: 8px 0; font-size: 0.9rem; }
+.jeux-legende summary { cursor: pointer; font-weight: 600; color: var(--accent); min-height: 40px; display: flex; align-items: center; }
+.jeux-legende ul { margin: 0; padding-left: 4px; list-style: none; }
+.jeux-legende li { padding: 2px 0; }
+.jeux-barre {
+  position: sticky; bottom: calc(var(--nav-h) + 8px + env(safe-area-inset-bottom)); z-index: 5;
+  display: flex; align-items: center; gap: 12px; margin-top: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(34, 48, 47, 0.12);
+}
+.jeux-barre-texte { flex: 1; display: flex; flex-direction: column; line-height: 1.25; }
+.jeux-barre-texte strong { font-size: 1.1rem; }
+.jeux-barre-texte span { font-size: 0.88rem; color: var(--muted); }
+.jeux-de-btn { flex: none; width: 68px; height: 68px; padding: 0; border: none; background: none; cursor: pointer; border-radius: 16px; }
+.jeux-de-btn:not(:disabled) { animation: jeux-invite 1.6s ease-in-out infinite; }
+.jeux-de-btn:disabled { cursor: default; }
+@keyframes jeux-invite { 50% { transform: scale(1.07) rotate(-4deg); } }
+.jeux-de { width: 100%; height: 100%; display: block; }
+.jeux-de.roule { animation: jeux-roule 0.6s linear; }
+@keyframes jeux-roule { 0% { transform: rotate(0); } 50% { transform: rotate(200deg) scale(0.85); } 100% { transform: rotate(360deg); } }
+
+/* ── Paires ── */
+.jeux-paires-tete { margin-bottom: 8px; }
+.jeux-paires-score { font-size: 1.05rem; margin: 0 0 2px; }
+.jeux-paires-statut { min-height: 1.5em; color: var(--muted); margin: 0; font-weight: 600; }
+.jeux-paires-grille { display: grid; gap: 8px; }
+.jeux-pcarte {
+  aspect-ratio: 3 / 4; padding: 0; border: none; background: none; cursor: pointer;
+  perspective: 600px; font: inherit; color: inherit; border-radius: 12px;
+  outline: 3px solid transparent; outline-offset: 1px;
+}
+.jeux-pcarte:disabled { cursor: default; }
+.jeux-pcarte-in { position: relative; display: block; width: 100%; height: 100%; transition: transform 0.4s ease; transform-style: preserve-3d; }
+.jeux-pcarte.visible .jeux-pcarte-in { transform: rotateY(180deg); }
+.jeux-pcarte-dos, .jeux-pcarte-face {
+  position: absolute; inset: 0; border-radius: 12px; backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.jeux-pcarte-dos {
+  background: repeating-linear-gradient(45deg, #1f6f6b 0 8px, #2a7f7a 8px 16px);
+  border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); color: #f2b84b; font-size: 1.6rem;
+}
+.jeux-pcarte-face { transform: rotateY(180deg); border: 2px solid var(--border); padding: 2px; }
+.jeux-pcarte.trouvee .jeux-pcarte-face { border-color: var(--ok); animation: jeux-paire 0.5s ease-out 0.35s; }
+@keyframes jeux-paire { 50% { transform: rotateY(180deg) scale(1.08); } }
+.jeux-pcarte-nom { font-size: 0.7rem; line-height: 1.1; font-weight: 700; text-align: center; padding: 0 2px; }
+
+/* ── Bataille navale ── */
+.jeux-nav-grille { display: grid; gap: 2px; width: 100%; max-width: 420px; margin: 0 auto; }
+.jeux-nav-grille.petite { max-width: 260px; }
+.jeux-nav-entete { display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); }
+.jeux-nav-case {
+  aspect-ratio: 1; min-width: 0; padding: 0; border: none; border-radius: 5px;
+  background: #cfe1ee; color: #22302f; font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.jeux-nav-grille.petite .jeux-nav-case { font-size: 0.7rem; border-radius: 3px; }
+.jeux-nav-case:not(:disabled):active { transform: scale(0.88); }
+.jeux-nav-case:disabled { cursor: default; }
+.jeux-nav-case.bateau { background: #7d8f9b; }
+.jeux-nav-case.eau { background: #e8f0f6; color: #5b7fa6; }
+.jeux-nav-case.touche { background: #f0a37f; color: #7a2410; }
+.jeux-nav-case.coule { background: #b8443b; color: #fff; }
+.jeux-nav-case.dernier { animation: jeux-impact 0.6s ease-out; box-shadow: 0 0 0 3px var(--sun); }
+.jeux-nav-case.surb { box-shadow: inset 0 0 0 2px var(--sun); }
+@keyframes jeux-impact { 0% { transform: scale(1.4); } 100% { transform: scale(1); } }
+.jeux-nav-statut { min-height: 3em; font-weight: 700; font-size: 1.05rem; text-align: center; padding: 8px 10px; border-radius: 12px; background: var(--surface); margin-bottom: 8px; }
+.jeux-nav-statut.touche, .jeux-nav-statut.coule { background: var(--warm-soft); color: #8a3a19; }
+.jeux-nav-statut.eau { background: #e1eaf4; color: #2f4f70; }
+.jeux-nav-titre { text-align: center; font-size: 1rem; margin: 4px 0 6px; }
+.jeux-nav-restants { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; font-size: 0.82rem; }
+.jeux-nav-restants li { padding: 3px 10px; border-radius: 999px; background: var(--surface-2); }
+.jeux-nav-restants li.coule { text-decoration: line-through; opacity: 0.6; }
+.jeux-nav-maflotte { margin-top: 10px; }
+.jeux-nav-maflotte summary { cursor: pointer; font-weight: 600; color: var(--accent); min-height: 44px; display: flex; align-items: center; justify-content: center; }
+.jeux-nav-placement h2 { margin-bottom: 8px; }
+.jeux-nav-bateaux { margin-bottom: 6px; }
+.jeux-nav-long { letter-spacing: -2px; font-size: 0.7rem; opacity: 0.7; margin-left: 4px; }
+.jeux-nav-outils { margin: 4px 0 10px; }
+.jeux-nav-outils .btn { flex: 1; padding: 8px 10px; }
+.jeux-erreur { color: var(--danger); font-weight: 600; }
+.jeux-ok { color: var(--ok); font-weight: 600; }
+.jeux-citation { background: var(--surface); border-radius: 10px; padding: 10px; font-style: italic; user-select: all; }
+.jeux-inviter h2 { margin-bottom: 4px; }
+.jeux-inviter .muted { margin: 10px 0 0; }
+.jeux-passage { text-align: center; padding: 24px 8px; }
+.jeux-passage-emoji { font-size: 4rem; animation: jeux-hop 0.6s ease-out; }
+.jeux-passage h2 { font-size: 1.4rem; }
+
+/* ── Cap au phare ── */
+.jeux-phare-sentier { display: block; width: 100%; height: auto; background: linear-gradient(#fdf8ef, #f3ecdf); border-radius: 16px; border: 1px solid var(--border); }
+.jeux-phare-ou { text-align: center; margin: 8px 0 12px; }
+.jeux-phare-table { display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; align-items: stretch; margin-bottom: 12px; }
+.jeux-phare-pioche {
+  min-height: 150px; border-radius: 16px; border: 3px solid #fff; cursor: pointer; font: inherit; color: #fff;
+  background: repeating-linear-gradient(-45deg, #3e6590 0 10px, #4a74a0 10px 20px);
+  box-shadow: 4px 4px 0 #2f4f70, 0 3px 8px rgba(0, 0, 0, 0.15);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 2rem;
+}
+.jeux-phare-pioche small { font-size: 0.95rem; font-weight: 700; }
+.jeux-phare-pioche:not(:disabled) { animation: jeux-invite 1.6s ease-in-out infinite; }
+.jeux-phare-pioche:disabled { opacity: 0.6; cursor: default; }
+.jeux-phare-carte {
+  min-height: 150px; border-radius: 16px; background: var(--surface); border: 2px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px; text-align: center;
+  animation: jeux-retourne 0.45s ease-out;
+}
+.jeux-phare-carte.vide { animation: none; border-style: dashed; color: var(--muted); font-size: 0.9rem; }
+.jeux-phare-carte.elan { background: var(--warm-soft); border-color: var(--warm); }
+.jeux-phare-carte.pause { background: #e1eaf4; border-color: #8aa8c8; }
+.jeux-phare-carte.vue { background: #fbefd2; border-color: var(--sun); }
+.jeux-phare-carte.pas { background: var(--accent-soft); border-color: #9cc9c3; }
+.jeux-phare-carte-emoji { font-size: 2rem; line-height: 1.1; }
+.jeux-phare-carte-pas { font-size: 1.3rem; font-weight: 800; }
+.jeux-phare-carte-cat { font-size: 0.78rem; color: var(--muted); }
+@keyframes jeux-retourne { from { transform: perspective(600px) rotateY(90deg); } }
+.jeux-phare-action p { margin-bottom: 8px; }

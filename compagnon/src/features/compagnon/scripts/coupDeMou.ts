@@ -7,8 +7,8 @@ import { closingWords } from './common'
 const POIDS = [
   { value: 'fatigue', label: 'La fatigue' },
   { value: 'travail', label: 'Le travail' },
-  { value: 'proches', label: 'La famille, les proches' },
-  { value: 'sante', label: 'La santé, les douleurs' },
+  { value: 'proches', label: 'La famille ou les proches' },
+  { value: 'sante', label: 'La santé ou les douleurs' },
   { value: 'solitude', label: 'La solitude' },
   { value: 'motivation', label: 'La motivation qui s’en va' },
   { value: 'image', label: 'L’image que j’ai de moi' },
