@@ -13,12 +13,26 @@ function point(pas: number) {
   return { x: 26 + t * 262, y: 158 - t * 104 + Math.sin(t * Math.PI * 3) * 20 }
 }
 
+// Petit phare rayé dessiné à la main (pied du phare en x, y).
+function Phare3({ x, y }: { x: number; y: number }) {
+  return (
+    <g transform={`translate(${x} ${y})`} className="jeux-phare-tour">
+      <path d="M-14 -34 L14 -34" stroke="#f2b84b" strokeWidth={3} strokeLinecap="round" className="jeux-phare-feu" />
+      <path d="M-8 0 L-5 -26 H5 L8 0 Z" fill="#fff" stroke="#b8443b" strokeWidth={1.5} />
+      <path d="M-7.2 -7 H7.2 L6.6 -12 H-6.6 Z M-6 -17 H6 L5.6 -21 H-5.6 Z" fill="#b8443b" />
+      <rect x={-5} y={-33} width={10} height={7} rx={1.5} fill="#f2b84b" stroke="#22302f" strokeWidth={1.2} />
+      <path d="M-6 -33 L0 -38 L6 -33 Z" fill="#b8443b" />
+    </g>
+  )
+}
+
 function Sentier({ pas }: { pas: number }) {
   const pts = Array.from({ length: DISTANCE + 1 }, (_, i) => point(i))
   const ici = point(pas)
   return (
     <svg viewBox="0 0 320 190" className="jeux-phare-sentier" role="img" aria-label={`Tu as fait ${pas} pas sur ${DISTANCE}.`}>
-      <rect x={0} y={150} width={320} height={40} fill="#e1eaf4" rx={8} />
+      <path d="M150 190 Q 230 160 320 112 V190 Z" fill="#cfe1ee" />
+      <path d="M200 176 q8 -4 16 0 t16 0 M250 150 q8 -4 16 0 t16 0" stroke="#fff" strokeWidth={2} fill="none" opacity={0.8} />
       <polyline points={pts.map((p) => `${p.x},${p.y}`).join(' ')} fill="none" stroke="#e7dccb" strokeWidth={14} strokeLinecap="round" strokeLinejoin="round" />
       <polyline
         points={pts.slice(0, pas + 1).map((p) => `${p.x},${p.y}`).join(' ')}
@@ -33,9 +47,9 @@ function Sentier({ pas }: { pas: number }) {
       ))}
       {ETAPES.map((e) => {
         const p = point(e.pas)
-        const fin = e.pas === DISTANCE
+        if (e.pas === DISTANCE) return <Phare3 key={e.pas} x={p.x} y={p.y - 6} />
         return (
-          <text key={e.pas} x={p.x} y={p.y - (fin ? 14 : 12)} fontSize={fin ? 30 : 18} textAnchor="middle">
+          <text key={e.pas} x={p.x} y={p.y - 12} fontSize={18} textAnchor="middle">
             {e.emoji}
           </text>
         )
@@ -61,7 +75,7 @@ function Partie({ reglages, onRejouer }: { reglages: Reglages; onRejouer: () => 
   if (e.phase === 'fin') {
     return (
       <FinPartie jeu="cap-au-phare" nomJeu="Cap au phare" suivi={seance.suivi} detente={reglages.detente} onRejouer={onRejouer}>
-        <p className="jeux-fin-sous">🗼 Tu as atteint le phare en {e.tirages} cartes. Quelle balade !</p>
+        <p className="jeux-fin-sous">🌊 Tu as atteint le phare en {e.tirages} cartes. Quelle balade !</p>
       </FinPartie>
     )
   }
@@ -160,7 +174,7 @@ export default function Phare() {
               <li>Pioche une carte à chaque tour.</li>
               <li>Fais le mouvement qu’elle propose (ou passe, sans pénalité), puis avance d’autant de pas.</li>
               <li>Les cartes Élan ⚡ font filer, les cartes Pause 🍃 et Belle vue 🌅 invitent à souffler.</li>
-              <li>Atteins le phare 🗼 au bout de {DISTANCE} pas pour finir la balade !</li>
+              <li>Atteins le phare au bord de la mer, au bout de {DISTANCE} pas pour finir la balade !</li>
             </ol>
           }
           onStart={(r) => setPartie({ reglages: r, cle: Date.now() })}

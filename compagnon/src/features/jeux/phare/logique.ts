@@ -25,7 +25,7 @@ export const ETAPES: { pas: number; nom: string; emoji: string }[] = [
   { pas: 8, nom: 'Le pont de bois', emoji: '🌉' },
   { pas: 12, nom: 'La forêt', emoji: '🌲' },
   { pas: 16, nom: 'La dune', emoji: '🏖️' },
-  { pas: DISTANCE, nom: 'Le phare', emoji: '🗼' },
+  { pas: DISTANCE, nom: 'Le phare', emoji: '🌊' },
 ]
 
 export function etapeAtteinte(pas: number) {
