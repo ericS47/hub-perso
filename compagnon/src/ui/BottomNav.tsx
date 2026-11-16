@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const TABS = [
   { to: '/', label: 'Accueil', icon: '🏠', end: true },
@@ -9,6 +9,8 @@ const TABS = [
 ]
 
 export default function BottomNav() {
+  // Pendant l'accueil du premier lancement, rien ne doit détourner du parcours.
+  if (useLocation().pathname.startsWith('/compagnon/bienvenue')) return null
   return (
     <nav className="bottom-nav" aria-label="Navigation principale">
       {TABS.map((t) => (
