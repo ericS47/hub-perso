@@ -40,6 +40,8 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
+        // L'appli Compagnon vit dans un sous-dossier : Maestro ne doit pas répondre à sa place.
+        navigateFallbackDenylist: [/\/compagnon(\/|$)/],
         // Couvertures en ligne gardées en cache : la bibliothèque reste illustrée hors ligne.
         runtimeCaching: [
           {

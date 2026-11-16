@@ -1,0 +1,146 @@
+/* Fonctionnalité « Mon profil » : toutes les classes sont préfixées par .profil- */
+.profil-hint { display: block; color: var(--muted); font-size: 0.85rem; margin: -2px 0 8px; }
+.profil-visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.profil-answer { background: var(--accent-soft); color: var(--accent); border-radius: 12px; padding: 10px 12px; font-weight: 600; }
+.profil-sub { border-left: 3px solid var(--accent-soft); padding-left: 12px; margin: 4px 0 16px; }
+.profil-q + .profil-q { border-top: 1px solid var(--border); padding-top: 14px; }
+
+/* Champs numériques */
+.profil-number { display: flex; align-items: center; gap: 8px; }
+.profil-number .input { max-width: 140px; }
+.profil-unit { color: var(--muted); font-size: 0.9rem; }
+.profil-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.profil-two .field { margin-bottom: 10px; }
+.profil-inline-add { display: flex; align-items: flex-end; gap: 8px; }
+.profil-inline-add .field { flex: 1; margin-bottom: 0; }
+.profil-check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; }
+.profil-check input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+
+/* Assistant pas à pas */
+.profil-steps { display: flex; gap: 4px; margin-bottom: 6px; }
+.profil-steps span { flex: 1; height: 6px; border-radius: 3px; background: var(--border); }
+.profil-steps span.is-past { background: var(--accent); opacity: 0.55; }
+.profil-steps span.is-current { background: var(--accent); }
+.profil-step-count { margin-bottom: 8px; }
+.profil-step h2 { font-size: 1.2rem; outline: none; }
+.profil-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.profil-saved { text-align: center; margin-top: 12px; font-size: 0.82rem; }
+.profil-validation { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 4px; }
+.profil-item { background: var(--bg); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+.profil-item h3 { margin-bottom: 8px; }
+.profil-item .field:last-child, .profil-item fieldset:last-child { margin-bottom: 0; }
+
+/* Accueil du profil */
+.profil-reassure p:last-child { margin-bottom: 0; }
+.profil-thanks { border-color: var(--ok); color: var(--ok); font-weight: 600; }
+.profil-progress { margin: 4px 0 18px; }
+.profil-gauge { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; margin: 8px 0; }
+.profil-gauge span { display: block; height: 100%; background: var(--accent); border-radius: 5px; transition: width 0.3s; }
+.profil-continue { margin-top: 10px; }
+.profil-group h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 18px 0 8px; }
+.profil-list { list-style: none; margin: 0; padding: 0; }
+.profil-list li + li { margin-top: 8px; }
+.profil-row {
+  display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  color: inherit; text-decoration: none;
+}
+.profil-row.is-done { background: #f2f8f4; border-color: #cfe6d6; }
+.profil-row-icon { font-size: 1.5rem; width: 36px; text-align: center; flex: none; }
+.profil-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.profil-row-text .muted { font-size: 0.82rem; }
+.profil-status { flex: none; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.profil-status.is-progress { background: var(--warm-soft); color: #9a4a26; }
+.profil-status.is-done { background: #dcefe2; color: #2c6b41; }
+
+/* Mes données */
+.profil-data { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); }
+.profil-danger-text { color: var(--danger); }
+
+/* Carte d'accueil */
+.profil-homecard h2 { margin: 0; }
+.profil-homecard p { margin-top: 8px; }
+.profil-homecard-next { color: var(--accent); font-weight: 700; margin-bottom: 0; }
+
+/* Onglets */
+.profil-tabs { display: flex; gap: 6px; margin: 4px 0 12px; }
+.profil-tabs-scroll { flex-wrap: wrap; }
+.profil-tab {
+  flex: none; min-height: 44px; padding: 8px 14px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font: inherit; font-size: 0.92rem; cursor: pointer; white-space: nowrap;
+}
+.profil-tab.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+.profil-tab-add { border-style: dashed; color: var(--accent); font-weight: 600; }
+
+/* Planning hebdomadaire */
+.profil-week { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+.profil-week > legend { float: left; width: 100%; margin-bottom: 4px; }
+.profil-day { clear: both; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.profil-day:last-of-type { border-bottom: none; margin-bottom: 8px; }
+.profil-add-slot { min-height: 44px; padding: 6px 10px; }
+.profil-free { margin: 0; font-size: 0.82rem; }
+.profil-slot { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+.profil-slot label { flex: 1; min-width: 0; }
+.profil-slot .input { padding: 9px 8px; min-height: 44px; }
+
+/* Résumé ONAPS */
+.profil-onaps-total { display: flex; flex-direction: column; align-items: center; padding: 12px; background: var(--accent-soft); border-radius: 12px; margin-bottom: 10px; }
+.profil-onaps-total strong { font-size: 1.8rem; color: var(--accent); }
+.profil-onaps-list { padding-left: 18px; margin: 0 0 8px; }
+.profil-onaps-list li { margin: 4px 0; }
+
+/* Silhouette */
+.profil-body { --profil-body: #e7dccb; display: block; width: 100%; max-width: 320px; margin: 0 auto 12px; }
+.profil-spot { fill: transparent; stroke: #b8a990; stroke-width: 1.5; stroke-dasharray: 3 3; cursor: pointer; }
+.profil-spot.on { fill: var(--warm); fill-opacity: 0.85; stroke: #a5522c; stroke-dasharray: none; }
+.profil-svg-label { font-size: 11px; fill: var(--muted); font-family: inherit; }
+
+/* Plateau repas */
+.profil-plateau { margin: 0 -4px; }
+.profil-tray, .profil-snack { display: block; width: 100%; max-width: 420px; margin: 0 auto 12px; }
+.profil-snack { max-width: 260px; }
+.profil-tray-wood { fill: #d8b88f; stroke: #b8946a; stroke-width: 2; }
+.profil-tray-inner { fill: #e6cba7; }
+.profil-tray-handle { fill: #a9845a; }
+.profil-cutlery { fill: #9aa3a2; }
+.profil-plate-rim { fill: #ffffff; stroke: #d9d2c4; stroke-width: 1.5; }
+.profil-plate-in { fill: #f7f4ee; stroke: #ebe4d6; }
+.profil-plate-pct { font-size: 11px; font-weight: 700; fill: #22302f; font-family: inherit; }
+.profil-dish-plate { fill: rgba(255, 255, 255, 0.45); stroke: #a9845a; stroke-width: 1.5; stroke-dasharray: 4 3; }
+.profil-dish.on .profil-dish-plate { fill: #ffffff; stroke: #d9d2c4; stroke-dasharray: none; }
+.profil-dish-plus { fill: #8c6a45; font-family: inherit; }
+.profil-dish .profil-svg-label { fill: #6b5236; }
+.profil-glass { fill: rgba(255, 255, 255, 0.55); stroke: #b9c6c8; stroke-width: 1.5; }
+.profil-water { fill: #a9d4e6; opacity: 0.8; }
+.profil-tray-veil { fill: rgba(246, 241, 233, 0.82); }
+.profil-tray-skip { font-size: 15px; font-weight: 700; fill: var(--muted); font-family: inherit; }
+.profil-skip { margin-bottom: 8px; }
+
+.profil-extra { border: 1px solid var(--border); border-radius: 12px; padding: 4px 12px; margin-bottom: 10px; background: var(--surface); }
+.profil-extra.on { border-color: var(--accent); background: #f4faf9; }
+.profil-extra-detail { margin: 0 0 10px; }
+
+.profil-sliders { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+.profil-sliders > legend { padding: 0 4px; }
+.profil-slider { padding: 6px 0; }
+.profil-slider + .profil-slider { border-top: 1px solid var(--surface-2); }
+.profil-slider label { font-weight: 600; }
+.profil-slider-row { display: flex; align-items: center; gap: 8px; }
+.profil-slider-row input[type='range'] { flex: 1; min-width: 0; height: 44px; margin: 0; }
+.profil-slider .profil-hint { margin: 0; }
+.profil-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
+.profil-step-btn {
+  flex: none; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface); color: var(--accent);
+  font: inherit; font-size: 1.3rem; font-weight: 700; cursor: pointer;
+}
+
+/* Encart de soutien */
+.profil-support { margin-top: 12px; }
+.profil-support h3 { font-size: 1.05rem; }
+.profil-support-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.profil-support-links .btn { justify-content: flex-start; }

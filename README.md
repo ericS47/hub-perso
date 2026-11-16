@@ -23,3 +23,15 @@ https://erics47.github.io/hub-perso/
 - Météo : Open-Meteo (sans clé)
 - Cours Bitcoin et Ethereum : CoinGecko (sans clé)
 - Culture, propositions pendant la saisie du titre et couvertures (sans clé) : Wikidata et Wikipédia (tous les types), iTunes (films, séries), Google Livres et Open Library (livres). Les photos importées restent dans l'appareil.
+
+## Mon Compagnon (dossier `compagnon/`)
+
+Seconde appli, indépendante de Maestro : accompagnement des patients (profil, agenda des séances d'activité physique, confident, jeux qui font bouger). Elle a ses propres dépendances et sa propre base locale.
+
+```bash
+cd compagnon
+npm install
+npm run dev
+```
+
+Publiée avec Maestro, à l'adresse https://erics47.github.io/hub-perso/compagnon/
