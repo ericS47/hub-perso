@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 import PageShell from '../../../ui/PageShell'
 import Chips from '../../../ui/Chips'
 import CarteExercice from '../CarteExercice'
@@ -199,7 +199,10 @@ function Partie({
     etatInitialNavale(config.taille, config.mode, config.regle, config.noms),
   )
   const seance = useSeance(reglages)
-  const [exo, setExo] = useState<Exercice | null>(null)
+  // Clé de l'exercice en cours : un nouveau tirage à chaque entrée en phase exercice.
+  const cleExo = e.phase === 'exercice' ? e.tirsJoues[0] + e.tirsJoues[1] : -1
+  const { tirer } = seance
+  const exo = useMemo<Exercice | null>(() => (cleExo >= 0 ? tirer() : null), [cleExo, tirer])
   const ia = e.mode === 'ia'
   const moi = e.camps[e.tour]
   const adverse = e.camps[e.tour === 0 ? 1 : 0]
@@ -221,16 +224,11 @@ function Partie({
   // Phase exercice : on tire un mouvement (ou on saute en mode détente).
   useEffect(() => {
     if (e.phase !== 'exercice') return
-    if (reglages.detente) {
-      dispatch({ type: 'exercice-fini' })
-      return
-    }
-    setExo((x) => x ?? seance.tirer())
-  }, [e.phase, reglages.detente, seance])
+    if (reglages.detente) dispatch({ type: 'exercice-fini' })
+  }, [e.phase, reglages.detente])
 
   function finExo(fait: boolean) {
     if (exo) (fait ? seance.fait : seance.passe)(exo)
-    setExo(null)
     dispatch({ type: 'exercice-fini' })
   }
 

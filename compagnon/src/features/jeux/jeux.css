@@ -231,3 +231,4 @@ a.jeux-tuile:active { transform: scale(0.98); }
 .jeux-phare-carte-cat { font-size: 0.78rem; color: var(--muted); }
 @keyframes jeux-retourne { from { transform: perspective(600px) rotateY(90deg); } }
 .jeux-phare-action p { margin-bottom: 8px; }
+.jeux-pcarte-face .jeux-figure { width: 82%; height: auto; max-height: 72%; }

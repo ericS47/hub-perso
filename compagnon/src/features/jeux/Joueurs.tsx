@@ -1,5 +1,5 @@
 import Chips from '../../ui/Chips'
-import { lireNoms } from './prefs'
+import { nomParDefaut } from './prefs'
 
 interface Props {
   noms: string[]
@@ -9,10 +9,6 @@ interface Props {
   // Libellés des choix de nombre (ex. « Solo », « À deux »).
   libelles?: string[]
   couleurs?: string[]
-}
-
-export function nomParDefaut(i: number): string {
-  return `Joueur ${i + 1}`
 }
 
 // Choix du nombre de joueurs et de leurs prénoms (sur le même téléphone).
@@ -50,15 +46,4 @@ export default function Joueurs({ noms, onChange, min = 1, max, libelles, couleu
       )}
     </section>
   )
-}
-
-// Joueurs de la dernière partie (au plus `max`), sinon un joueur seul.
-export function nomsInitiaux(max: number): string[] {
-  const l = lireNoms().slice(0, max)
-  return l.length > 0 ? l : [nomParDefaut(0)]
-}
-
-// Noms nettoyés (vides remplacés par « Joueur n »).
-export function nomsPropres(noms: string[]): string[] {
-  return noms.map((n, i) => n.trim() || nomParDefaut(i))
 }

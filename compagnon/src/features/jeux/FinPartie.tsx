@@ -24,7 +24,7 @@ function messageValorisant(faits: number, detente: boolean): string {
 
 // Récapitulatif de fin de partie : enregistrement dans db.games et proposition de séance.
 export default function FinPartie({ jeu, nomJeu, suivi, detente, children, onRejouer }: Props) {
-  const dureeSec = useRef(Math.max(1, Math.round((Date.now() - suivi.debut) / 1000)))
+  const [dureeSec] = useState(() => Math.max(1, Math.round((Date.now() - suivi.debut) / 1000)))
   const enregistre = useRef(false)
   const [seance, setSeance] = useState<'non' | 'en-cours' | 'ajoutee'>('non')
 
@@ -35,12 +35,12 @@ export default function FinPartie({ jeu, nomJeu, suivi, detente, children, onRej
     void db.games.add({
       game: jeu,
       exercisesDone: suivi.faits,
-      durationSec: dureeSec.current,
+      durationSec: dureeSec,
       createdAt: Date.now(),
     })
-  }, [jeu, suivi.faits])
+  }, [jeu, suivi.faits, dureeSec])
 
-  const dureeMin = Math.max(1, Math.round(dureeSec.current / 60))
+  const dureeMin = Math.max(1, Math.round(dureeSec / 60))
 
   async function compterSeance() {
     setSeance('en-cours')

@@ -3,10 +3,10 @@ import PageShell from '../../../ui/PageShell'
 import Chips from '../../../ui/Chips'
 import CarteExercice from '../CarteExercice'
 import FinPartie from '../FinPartie'
-import Joueurs, { nomsInitiaux, nomsPropres } from '../Joueurs'
+import Joueurs from '../Joueurs'
 import Preparation from '../Preparation'
 import { CATEGORIES, type Exercice, type Reglages } from '../exercices'
-import { ecrireNoms } from '../prefs'
+import { ecrireNoms, nomsInitiaux, nomsPropres } from '../prefs'
 import { useSeance } from '../useSeance'
 import De from './De'
 import {
@@ -135,7 +135,9 @@ function Partie({ noms, longueur, reglages, onRejouer }: { noms: string[]; longu
   const [roule, setRoule] = useState(false)
   const [exo, setExo] = useState<Exercice | null>(null)
   const tirer = useRef(seance.tirer)
-  tirer.current = seance.tirer
+  useEffect(() => {
+    tirer.current = seance.tirer
+  }, [seance.tirer])
 
   const joueur = etat.joueurs[etat.tour]
   const plusieurs = etat.joueurs.length > 1
@@ -145,7 +147,6 @@ function Partie({ noms, longueur, reglages, onRejouer }: { noms: string[]; longu
     if (etat.phase !== 'deplacement' || !etat.coup) return
     const coup = etat.coup
     let i = 0
-    setEtape(0)
     const id = window.setInterval(() => {
       i++
       if (i < coup.chemin.length) {
@@ -178,6 +179,7 @@ function Partie({ noms, longueur, reglages, onRejouer }: { noms: string[]; longu
         window.clearInterval(id)
         setFaceDe(valeur)
         setRoule(false)
+        setEtape(0)
         dispatch({ type: 'lancer', de: valeur })
       }
     }, 85)

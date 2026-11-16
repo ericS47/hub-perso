@@ -44,3 +44,18 @@ export function ecrireNoms(noms: string[]): void {
     // ignoré
   }
 }
+
+export function nomParDefaut(i: number): string {
+  return `Joueur ${i + 1}`
+}
+
+// Joueurs de la dernière partie (au plus `max`), sinon un joueur seul.
+export function nomsInitiaux(max: number): string[] {
+  const l = lireNoms().slice(0, max)
+  return l.length > 0 ? l : [nomParDefaut(0)]
+}
+
+// Noms nettoyés (vides remplacés par « Joueur n »).
+export function nomsPropres(noms: string[]): string[] {
+  return noms.map((n, i) => n.trim() || nomParDefaut(i))
+}
