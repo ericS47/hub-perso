@@ -19,8 +19,16 @@ export default function ThemeRows({ items, themes, onOpen }: Props) {
   const orphans = items.filter((i) => i.genres.length === 0)
   if (orphans.length) rows.push({ id: NO_THEME, label: 'Sans thème', items: orphans })
 
+  const sorted = rows.length - (orphans.length ? 1 : 0)
+
   return (
     <div className="theme-rows">
+      {sorted === 0 && (
+        <p className="muted small-text theme-hint">
+          Aucune œuvre n'est encore rangée dans un thème. Coche des thèmes dans la fiche d'une œuvre (Modifier), ou
+          réimporte le fichier Babelio qui contient les thèmes.
+        </p>
+      )}
       {rows.map((r) => (
         <section key={r.id} className="theme-row" aria-label={r.label}>
           <button type="button" className="theme-row-head" onClick={() => onOpen(r.id)}>

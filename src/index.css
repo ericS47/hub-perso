@@ -220,7 +220,10 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 
 /* Vue par thème */
 .view-switch { margin-bottom: 2px; }
-.theme-rows { display: grid; gap: 18px; }
+.theme-rows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+/* min-width 0 : sinon la rangée s'élargit à toutes ses couvertures et ne glisse plus. */
+.theme-row { min-width: 0; }
+.theme-hint { margin: 0 0 4px; }
 .theme-row-head {
   display: flex; justify-content: space-between; align-items: baseline; width: 100%;
   background: none; border: none; color: var(--text); padding: 0 0 6px; cursor: pointer; text-align: left;
