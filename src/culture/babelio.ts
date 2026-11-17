@@ -66,6 +66,7 @@ export async function importBabelio(file: File): Promise<ImportResult> {
   if (iTitle < 0) throw new Error('Colonne « Titre » introuvable : est-ce bien l’export CSV de Babelio ?')
   const iAuthor = column(header, 'auteur', 'author')
   const iIsbn = column(header, 'isbn', 'ean')
+  const iCover = column(header, 'couverture', 'cover', 'image')
 
   const existing = new Set((await db.items.where('category').equals('livres').toArray()).map((i) => norm(i.title)))
   const now = Date.now()
@@ -86,8 +87,11 @@ export async function importBabelio(file: File): Promise<ImportResult> {
       title,
       category: 'livres',
       creator: iAuthor >= 0 ? r[iAuthor]?.trim() || undefined : undefined,
-      // Couverture Open Library par ISBN ; si elle n'existe pas, l'icône s'affiche.
-      cover: isbn && isbn.length >= 10 ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false` : undefined,
+      // Couverture fournie par le fichier, sinon Open Library par ISBN ;
+      // à défaut, l'icône s'affiche.
+      cover:
+        (iCover >= 0 && /^https:\/\//.test(r[iCover]?.trim() ?? '') ? r[iCover].trim() : undefined) ??
+        (isbn && isbn.length >= 10 ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false` : undefined),
       seen: false,
       priority: false,
       ownership: 'none',
