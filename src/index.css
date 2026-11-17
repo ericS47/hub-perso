@@ -308,6 +308,7 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .small-link { align-self: flex-start; font-size: 0.8rem; padding: 0; }
 .cf-info .small-link { align-self: center; }
 .danger { color: #f87171; }
+.import-link { color: var(--accent); }
 .empty { text-align: center; display: grid; gap: 10px; justify-items: center; }
 
 /* Panneau modal */

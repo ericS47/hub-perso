@@ -23,6 +23,8 @@ export interface CultureItem {
   // Œuvre souvent conseillée : vignette mise en avant.
   priority: boolean
   recommendedBy?: string
+  // Auteur, réalisateur… (rempli par l'import Babelio).
+  creator?: string
   ownership: Ownership
   genres: string[]
   listIds: number[]

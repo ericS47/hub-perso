@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type CultureItem, type CultureList, type Ownership } from '../db'
 import { categoryOf, doneLabel } from '../culture/categories'
+import { importBabelio } from '../culture/babelio'
 import Coverflow from '../components/Coverflow'
 import CoverImage from '../components/CoverImage'
 import ItemForm from '../components/ItemForm'
@@ -116,6 +117,20 @@ export default function Library() {
     navigate('/culture')
   }
 
+  async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const r = await importBabelio(file)
+      window.alert(
+        `${r.added} livre(s) importé(s)` + (r.skipped ? `, ${r.skipped} déjà présent(s) ignoré(s).` : '.'),
+      )
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Import impossible.')
+    }
+  }
+
   async function update(item: CultureItem, changes: Partial<CultureItem>) {
     if (item.id !== undefined) await db.items.update(item.id, changes)
   }
@@ -197,6 +212,12 @@ export default function Library() {
             ))}
           </div>
         )}
+        {cat?.id === 'livres' && (
+          <label className="link-btn small-link import-link">
+            📥 Importer depuis Babelio (fichier CSV)
+            <input type="file" accept=".csv,text/csv,text/plain" hidden onChange={onImport} />
+          </label>
+        )}
         {activeList && (
           <button type="button" className="link-btn small-link danger" onClick={() => deleteList(activeList)}>
             Supprimer la liste
@@ -227,6 +248,7 @@ export default function Library() {
               <h2 className="cf-title">{centered.title}</h2>
               <p className="muted small-text">
                 {categoryOf(centered.category)?.icon} {categoryOf(centered.category)?.label}
+                {centered.creator && ` · ${centered.creator}`}
                 {centered.genres.length > 0 && ` · ${centered.genres.join(', ')}`}
               </p>
               {centered.priority && (
