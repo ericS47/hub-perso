@@ -1,4 +1,5 @@
 import { db, type CultureItem } from '../db'
+import { ensureThemes } from './themes'
 
 // Import de l'export « Mes livres » de Babelio (fichier CSV). Le format exact
 // n'est pas documenté : séparateur, encodage et colonnes sont détectés.
@@ -56,6 +57,8 @@ function column(header: string[], ...names: string[]) {
 export interface ImportResult {
   added: number
   skipped: number
+  // Livres déjà présents qui ont reçu de nouveaux thèmes.
+  updated: number
   total: number
 }
 
@@ -67,21 +70,42 @@ export async function importBabelio(file: File): Promise<ImportResult> {
   const iAuthor = column(header, 'auteur', 'author')
   const iIsbn = column(header, 'isbn', 'ean')
   const iCover = column(header, 'couverture', 'cover', 'image')
+  const iThemes = column(header, 'theme', 'genre')
 
-  const existing = new Set((await db.items.where('category').equals('livres').toArray()).map((i) => norm(i.title)))
+  const existing = new Map<string, CultureItem>()
+  for (const i of await db.items.where('category').equals('livres').toArray()) existing.set(norm(i.title), i)
+  const seenInFile = new Set<string>()
   const now = Date.now()
   const toAdd: CultureItem[] = []
+  const toUpdate: CultureItem[] = []
+  const allThemes = new Set<string>()
   let skipped = 0
 
   rows.slice(1).forEach((r, index) => {
     const title = r[iTitle]?.trim()
     if (!title) return
-    // Déjà présent (dans le Hub ou deux fois dans le fichier) : ignoré.
-    if (existing.has(norm(title))) {
+    const themes =
+      iThemes >= 0
+        ? (r[iThemes] ?? '')
+            .split(/[,|]/)
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : []
+    themes.forEach((t) => allThemes.add(t))
+    const key = norm(title)
+    if (seenInFile.has(key)) {
       skipped++
       return
     }
-    existing.add(norm(title))
+    seenInFile.add(key)
+    // Déjà dans Maestro : on ajoute seulement les thèmes manquants.
+    const known = existing.get(key)
+    if (known) {
+      const merged = [...new Set([...known.genres, ...themes])]
+      if (merged.length > known.genres.length) toUpdate.push({ ...known, genres: merged })
+      else skipped++
+      return
+    }
     const isbn = iIsbn >= 0 ? r[iIsbn]?.replace(/[^0-9Xx]/g, '') : ''
     toAdd.push({
       title,
@@ -95,13 +119,15 @@ export async function importBabelio(file: File): Promise<ImportResult> {
       seen: false,
       priority: false,
       ownership: 'none',
-      genres: [],
+      genres: themes,
       listIds: [],
       // Ordre du fichier conservé (le premier livre reste le plus récent).
       createdAt: now - index,
     })
   })
 
+  await ensureThemes('livres', [...allThemes])
   await db.items.bulkAdd(toAdd)
-  return { added: toAdd.length, skipped, total: toAdd.length + skipped }
+  await db.items.bulkPut(toUpdate)
+  return { added: toAdd.length, updated: toUpdate.length, skipped, total: toAdd.length + toUpdate.length + skipped }
 }

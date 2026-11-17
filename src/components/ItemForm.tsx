@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { db, type CultureCategory, type CultureItem, type CultureList, type Ownership } from '../db'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db, type CultureCategory, type CultureItem, type CultureList, type CultureTheme, type Ownership } from '../db'
 import { CATEGORIES, OWNERSHIP, doneLabel, parseGenres } from '../culture/categories'
 import type { Suggestion } from '../culture/suggest'
+import { ensureThemes } from '../culture/themes'
 import CoverPicker from './CoverPicker'
 import TitleAutocomplete from './TitleAutocomplete'
 import Sheet from './Sheet'
@@ -10,13 +12,12 @@ interface Props {
   // Œuvre à modifier ; absente pour un ajout.
   item?: CultureItem
   defaultCategory: CultureCategory
-  knownGenres: string[]
   lists: CultureList[]
   onClose: () => void
   onSaved: (id: number) => void
 }
 
-export default function ItemForm({ item, defaultCategory, knownGenres, lists, onClose, onSaved }: Props) {
+export default function ItemForm({ item, defaultCategory, lists, onClose, onSaved }: Props) {
   const [title, setTitle] = useState(item?.title ?? '')
   const [category, setCategory] = useState<CultureCategory>(item?.category ?? defaultCategory)
   const [cover, setCover] = useState(item?.cover)
@@ -24,21 +25,36 @@ export default function ItemForm({ item, defaultCategory, knownGenres, lists, on
   const [seen, setSeen] = useState(item?.seen ?? false)
   const [priority, setPriority] = useState(item?.priority ?? false)
   const [recommendedBy, setRecommendedBy] = useState(item?.recommendedBy ?? '')
-  const [genres, setGenres] = useState((item?.genres ?? []).join(', '))
+  const [genres, setGenres] = useState<string[]>(item?.genres ?? [])
+  const [newTheme, setNewTheme] = useState('')
   const [listIds, setListIds] = useState(item?.listIds ?? [])
 
-  const current = parseGenres(genres)
-  const suggestions = knownGenres.filter((g) => !current.some((c) => c.toLowerCase() === g.toLowerCase()))
+  const themes = useLiveQuery(
+    () => db.themes.where('category').equals(category).sortBy('name'),
+    [category],
+    [] as CultureTheme[],
+  )
+  // Thèmes cochés mais pas (encore) dans la liste du type : ajoutés à l'enregistrement.
+  const extra = genres.filter((g) => !themes.some((t) => t.name.toLowerCase() === g.toLowerCase()))
+  const choices = [...themes.map((t) => t.name), ...extra].sort((a, b) => a.localeCompare(b, 'fr'))
 
-  function addGenre(g: string) {
-    setGenres([...current, g].join(', '))
+  function toggleTheme(name: string) {
+    setGenres((gs) => (gs.includes(name) ? gs.filter((g) => g !== name) : [...gs, name]))
+  }
+
+  function addTheme() {
+    const [name] = parseGenres(newTheme)
+    setNewTheme('')
+    if (!name) return
+    const known = choices.find((c) => c.toLowerCase() === name.toLowerCase()) ?? name
+    setGenres((gs) => (gs.includes(known) ? gs : [...gs, known]))
   }
 
   // Une proposition choisie remplit le titre, la couverture et le genre s'il est connu.
   function pickSuggestion(s: Suggestion) {
     setTitle(s.title)
     if (s.cover) setCover(s.cover)
-    if (s.genres.length) setGenres(parseGenres([...current, ...s.genres].join(',')).join(', '))
+    if (s.genres.length) setGenres((gs) => parseGenres([...gs, ...s.genres].join(',')))
   }
 
   function toggleList(id: number) {
@@ -57,9 +73,10 @@ export default function ItemForm({ item, defaultCategory, knownGenres, lists, on
       seen,
       priority,
       recommendedBy: priority ? recommendedBy.trim() || undefined : undefined,
-      genres: current,
+      genres,
       listIds,
     }
+    await ensureThemes(category, genres)
     const id =
       item?.id !== undefined
         ? (await db.items.update(item.id, data), item.id)
@@ -142,24 +159,40 @@ export default function ItemForm({ item, defaultCategory, knownGenres, lists, on
           />
         )}
 
-        <label className="field-label">
-          Genres (séparés par des virgules)
-          <input
-            className="field"
-            value={genres}
-            onChange={(e) => setGenres(e.target.value)}
-            placeholder="ex. Thriller, SF, Coopératif"
-          />
-        </label>
-        {suggestions.length > 0 && (
-          <div className="filters">
-            {suggestions.map((g) => (
-              <button key={g} type="button" className="chip" onClick={() => addGenre(g)}>
-                + {g}
+        <div className="field-label">
+          Thèmes (plusieurs possibles)
+          <div className="filters" role="group" aria-label="Thèmes">
+            {choices.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={genres.includes(name) ? 'chip small active' : 'chip small'}
+                aria-pressed={genres.includes(name)}
+                onClick={() => toggleTheme(name)}
+              >
+                {name}
               </button>
             ))}
           </div>
-        )}
+          <div className="task-form">
+            <input
+              className="field"
+              value={newTheme}
+              onChange={(e) => setNewTheme(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addTheme()
+                }
+              }}
+              placeholder="Nouveau thème"
+              aria-label="Nouveau thème"
+            />
+            <button type="button" className="btn ghost" onClick={addTheme}>
+              Créer
+            </button>
+          </div>
+        </div>
 
         {lists.length > 0 && (
           <div className="field-label">

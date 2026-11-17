@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import { DEFAULT_THEMES } from './culture/defaultThemes'
 
 export interface Task {
   id?: number
@@ -62,6 +63,15 @@ export interface NoteLabel {
   createdAt: number
 }
 
+// Thème (sous-catégorie) d'un type d'œuvre ; une œuvre en a autant qu'elle veut
+// (champ genres de CultureItem, qui contient les noms des thèmes).
+export interface CultureTheme {
+  id?: number
+  category: CultureCategory
+  name: string
+  createdAt: number
+}
+
 // labelId = 0 : note sans étiquette.
 export interface Note {
   id?: number
@@ -80,6 +90,7 @@ class HubDB extends Dexie {
   positions!: Table<Position, number>
   labels!: Table<NoteLabel, number>
   notes!: Table<Note, number>
+  themes!: Table<CultureTheme, number>
 
   constructor() {
     super('hub')
@@ -124,7 +135,39 @@ class HubDB extends Dexie {
       labels: '++id, parentId, createdAt',
       notes: '++id, labelId, updatedAt',
     })
+    // Version 6 : thèmes par type d'œuvre, créés avec une liste de départ
+    // complétée par les genres déjà utilisés.
+    this.version(6)
+      .stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+        labels: '++id, parentId, createdAt',
+        notes: '++id, labelId, updatedAt',
+        themes: '++id, category, createdAt',
+      })
+      .upgrade(async (tx) => {
+        const items = (await tx.table('items').toArray()) as CultureItem[]
+        await tx.table('themes').bulkAdd(seedThemes(items))
+      })
+    // Base toute neuve : les upgrades ne tournent pas, on crée la liste ici.
+    this.on('populate', (tx) => tx.table('themes').bulkAdd(seedThemes([])))
   }
+}
+
+function seedThemes(items: CultureItem[]): CultureTheme[] {
+  const out: CultureTheme[] = []
+  const now = Date.now()
+  for (const [category, names] of Object.entries(DEFAULT_THEMES) as [CultureCategory, string[]][]) {
+    const used = items.filter((i) => i.category === category).flatMap((i) => i.genres ?? [])
+    const all = [...names, ...used]
+    all
+      .filter((n, i) => all.findIndex((m) => m.toLowerCase() === n.toLowerCase()) === i)
+      .forEach((name, i) => out.push({ category, name, createdAt: now + i }))
+  }
+  return out
 }
 
 // Base locale uniquement : aucune donnée ne quitte l'appareil.

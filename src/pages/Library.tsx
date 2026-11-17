@@ -1,15 +1,17 @@
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, type CultureItem, type CultureList, type Ownership } from '../db'
+import { db, type CultureItem, type CultureList, type CultureTheme, type Ownership } from '../db'
 import { categoryOf, doneLabel } from '../culture/categories'
 import { importBabelio } from '../culture/babelio'
 import Coverflow from '../components/Coverflow'
 import CoverImage from '../components/CoverImage'
 import ItemForm from '../components/ItemForm'
+import ThemeRows, { NO_THEME } from '../components/ThemeRows'
+import ThemeManager from '../components/ThemeManager'
 
 type Filter = 'all' | 'priority' | 'owned' | 'wish' | 'done' | 'todo'
-type View = 'carousel' | 'grid'
+type View = 'carousel' | 'grid' | 'themes'
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: 'all', label: 'Tout' },
@@ -20,11 +22,18 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: 'todo', label: 'À découvrir' },
 ]
 
+const VIEWS: { id: View; label: string }[] = [
+  { id: 'carousel', label: '◫ Carrousel' },
+  { id: 'grid', label: '▦ Grille' },
+  { id: 'themes', label: '🗂 Par thème' },
+]
+
 const VIEW_KEY = 'culture-view'
 
 function readView(): View {
   try {
-    return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'carousel'
+    const v = localStorage.getItem(VIEW_KEY)
+    return v === 'grid' || v === 'themes' ? v : 'carousel'
   } catch {
     return 'carousel'
   }
@@ -64,6 +73,12 @@ export default function Library() {
   const [centeredId, setCenteredId] = useState<number>()
   const [focusId, setFocusId] = useState<number>()
   const [editing, setEditing] = useState<CultureItem | 'new'>()
+  const [managing, setManaging] = useState(false)
+  const themeList = useLiveQuery(
+    () => (category ? db.themes.where('category').equals(category).toArray() : []),
+    [category],
+    [] as CultureTheme[],
+  )
 
   const navigate = useNavigate()
   const onCenterChange = useCallback((item: CultureItem) => setCenteredId(item.id), [])
@@ -81,21 +96,36 @@ export default function Library() {
 
   const inTab = all.filter((i) => (isList ? i.listIds.includes(listId) : i.category === cat?.id))
   const tabGenres = [...new Set(inTab.flatMap((i) => i.genres))].sort((a, b) => a.localeCompare(b, 'fr'))
-  const allGenres = [...new Set(all.flatMap((i) => i.genres))].sort((a, b) => a.localeCompare(b, 'fr'))
-  const activeGenre = genre && tabGenres.includes(genre) ? genre : undefined
+  const activeGenre = genre === NO_THEME || (genre && tabGenres.includes(genre)) ? genre : undefined
   const q = query.trim().toLowerCase()
 
   // Les œuvres conseillées passent devant, puis les plus récentes.
   const visible = inTab
     .filter((i) => matches(i, filter))
-    .filter((i) => !activeGenre || i.genres.includes(activeGenre))
+    .filter((i) => !activeGenre || (activeGenre === NO_THEME ? i.genres.length === 0 : i.genres.includes(activeGenre)))
     .filter((i) => !q || i.title.toLowerCase().includes(q))
     .sort((a, b) => Number(b.priority) - Number(a.priority) || b.createdAt - a.createdAt)
+
+  // Rangées par thème : les thèmes les plus fournis d'abord.
+  const rowThemes = [...new Set([...themeList.map((t) => t.name), ...tabGenres])]
+    .map((name) => ({ name, n: visible.filter((i) => i.genres.includes(name)).length }))
+    .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'fr'))
+    .map((t) => t.name)
+
+  function openFromTheme(theme: string, item?: CultureItem) {
+    setGenre(theme)
+    setFocusId(item?.id)
+    setCenteredId(item?.id)
+    changeView('carousel')
+    window.scrollTo({ top: 0 })
+  }
 
   const centered = visible.find((i) => i.id === centeredId) ?? visible[0]
 
   function changeView(v: View) {
     setView(v)
+    // La vue par thème montre tous les thèmes : le filtre de thème n'y a pas de sens.
+    if (v === 'themes') setGenre(undefined)
     try {
       localStorage.setItem(VIEW_KEY, v)
     } catch {
@@ -123,9 +153,10 @@ export default function Library() {
     if (!file) return
     try {
       const r = await importBabelio(file)
-      window.alert(
-        `${r.added} livre(s) importé(s)` + (r.skipped ? `, ${r.skipped} déjà présent(s) ignoré(s).` : '.'),
-      )
+      const parts = [`${r.added} livre(s) importé(s)`]
+      if (r.updated) parts.push(`${r.updated} rangé(s) dans leurs thèmes`)
+      if (r.skipped) parts.push(`${r.skipped} déjà à jour`)
+      window.alert(parts.join(', ') + '.')
     } catch (err) {
       window.alert(err instanceof Error ? err.message : 'Import impossible.')
     }
@@ -153,15 +184,6 @@ export default function Library() {
           </p>
         </div>
         <div className="head-actions">
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => changeView(view === 'carousel' ? 'grid' : 'carousel')}
-            aria-label={view === 'carousel' ? 'Afficher en grille' : 'Afficher en carrousel'}
-            title={view === 'carousel' ? 'Afficher en grille' : 'Afficher en carrousel'}
-          >
-            {view === 'carousel' ? '▦' : '◫'}
-          </button>
           <button type="button" className="btn" onClick={() => setEditing('new')}>
             + Ajouter
           </button>
@@ -177,6 +199,19 @@ export default function Library() {
           placeholder="Rechercher un titre"
           aria-label="Rechercher un titre"
         />
+        <div className="segmented view-switch" role="group" aria-label="Affichage">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className={view === v.id ? 'chip small active' : 'chip small'}
+              aria-pressed={view === v.id}
+              onClick={() => changeView(v.id)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
         <div className="filters scroll-row" role="group" aria-label="Filtrer par statut">
           {FILTERS.map((f) => (
             <button
@@ -190,15 +225,20 @@ export default function Library() {
             </button>
           ))}
         </div>
-        {tabGenres.length > 0 && (
-          <div className="filters scroll-row" role="group" aria-label="Filtrer par genre">
+        {tabGenres.length > 0 && view !== 'themes' && (
+          <div className="filters scroll-row" role="group" aria-label="Filtrer par thème">
             <button
               type="button"
               className={!activeGenre ? 'chip small active' : 'chip small'}
               onClick={() => setGenre(undefined)}
             >
-              Tous genres
+              Tous thèmes
             </button>
+            {activeGenre === NO_THEME && (
+              <button type="button" className="chip small active" aria-pressed onClick={() => setGenre(undefined)}>
+                Sans thème
+              </button>
+            )}
             {tabGenres.map((g) => (
               <button
                 key={g}
@@ -211,6 +251,11 @@ export default function Library() {
               </button>
             ))}
           </div>
+        )}
+        {view === 'themes' && cat && (
+          <button type="button" className="link-btn small-link import-link" onClick={() => setManaging(true)}>
+            ⚙️ Gérer les thèmes
+          </button>
         )}
         {cat?.id === 'livres' && (
           <label className="link-btn small-link import-link">
@@ -294,6 +339,8 @@ export default function Library() {
             </section>
           )}
         </>
+      ) : view === 'themes' ? (
+        <ThemeRows items={visible} themes={rowThemes} onOpen={openFromTheme} />
       ) : (
         <div className="item-grid">
           {visible.map((i) => (
@@ -316,12 +363,13 @@ export default function Library() {
         </div>
       )}
 
+      {managing && cat && <ThemeManager category={cat.id} items={inTab} onClose={() => setManaging(false)} />}
+
       {editing && (
         <ItemForm
           key={editing === 'new' ? 'new' : editing.id}
           item={editing === 'new' ? undefined : editing}
           defaultCategory={cat?.id ?? 'films'}
-          knownGenres={allGenres}
           lists={lists}
           onClose={() => setEditing(undefined)}
           onSaved={setFocusId}
