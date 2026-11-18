@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type CultureItem, type CultureList, type CultureTheme, type Ownership } from '../db'
 import { categoryOf, doneLabel } from '../culture/categories'
 import { importBabelio } from '../culture/babelio'
+import { importWatchList } from '../culture/watchlist'
 import Coverflow from '../components/Coverflow'
 import CoverImage from '../components/CoverImage'
 import ItemForm from '../components/ItemForm'
@@ -147,6 +148,21 @@ export default function Library() {
     navigate('/culture')
   }
 
+  async function onImportWatchList(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const r = await importWatchList(file)
+      const parts = [`${r.films} film(s) et ${r.series} série(s) importé(s)`]
+      if (r.updated) parts.push(`${r.updated} complété(s)`)
+      if (r.skipped) parts.push(`${r.skipped} déjà à jour`)
+      window.alert(parts.join(', ') + '.')
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Import impossible.')
+    }
+  }
+
   async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = ''
@@ -256,6 +272,12 @@ export default function Library() {
           <button type="button" className="link-btn small-link import-link" onClick={() => setManaging(true)}>
             ⚙️ Gérer les thèmes
           </button>
+        )}
+        {(cat?.id === 'films' || cat?.id === 'series') && (
+          <label className="link-btn small-link import-link">
+            📥 Importer depuis Watch List (fichier .json)
+            <input type="file" accept=".json,application/json,text/plain" hidden onChange={onImportWatchList} />
+          </label>
         )}
         {cat?.id === 'livres' && (
           <label className="link-btn small-link import-link">
