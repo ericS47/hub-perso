@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type CultureItem, type CultureList, type CultureTheme, type Ownership } from '../db'
 import { categoryOf, doneLabel } from '../culture/categories'
 import { importBabelio } from '../culture/babelio'
 import { importWatchList } from '../culture/watchlist'
+import { fillMissingCovers, type FillProgress } from '../culture/fillCovers'
 import Coverflow from '../components/Coverflow'
 import CoverImage from '../components/CoverImage'
 import ItemForm from '../components/ItemForm'
@@ -75,6 +76,9 @@ export default function Library() {
   const [focusId, setFocusId] = useState<number>()
   const [editing, setEditing] = useState<CultureItem | 'new'>()
   const [managing, setManaging] = useState(false)
+  const [filling, setFilling] = useState<FillProgress | 'checking'>()
+  const fillAbort = useRef<AbortController | null>(null)
+  useEffect(() => () => fillAbort.current?.abort(), [])
   const themeList = useLiveQuery(
     () => (category ? db.themes.where('category').equals(category).toArray() : []),
     [category],
@@ -146,6 +150,25 @@ export default function Library() {
       await db.lists.delete(list.id!)
     })
     navigate('/culture')
+  }
+
+  async function fillCovers() {
+    if (filling) {
+      fillAbort.current?.abort()
+      return
+    }
+    const ctrl = new AbortController()
+    fillAbort.current = ctrl
+    setFilling('checking')
+    const r = await fillMissingCovers(inTab, ctrl.signal, setFilling)
+    setFilling(undefined)
+    if (ctrl.signal.aborted) return
+    window.alert(
+      r.total === 0
+        ? 'Toutes les œuvres ont déjà une image.'
+        : `${r.found} image(s) trouvée(s) sur ${r.total} manquante(s).` +
+            (r.found < r.total ? ' Pour les autres : Modifier → Couverture.' : ''),
+    )
   }
 
   async function onImportWatchList(e: React.ChangeEvent<HTMLInputElement>) {
@@ -271,6 +294,15 @@ export default function Library() {
         {view === 'themes' && cat && (
           <button type="button" className="link-btn small-link import-link" onClick={() => setManaging(true)}>
             ⚙️ Gérer les thèmes
+          </button>
+        )}
+        {inTab.length > 0 && (
+          <button type="button" className="link-btn small-link import-link" onClick={fillCovers}>
+            {filling === undefined
+              ? '🖼️ Trouver les affiches manquantes'
+              : filling === 'checking'
+                ? 'Vérification des images… (toucher pour arrêter)'
+                : `Recherche des affiches ${filling.done}/${filling.total}… (toucher pour arrêter)`}
           </button>
         )}
         {(cat?.id === 'films' || cat?.id === 'series') && (

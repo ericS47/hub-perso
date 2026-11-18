@@ -1,5 +1,5 @@
 import type { CultureCategory } from '../db'
-import { jsonp } from './suggest'
+import { imdbSearch } from './imdb'
 
 export interface CoverHit {
   url: string
@@ -16,21 +16,9 @@ async function getJson(url: string, signal: AbortSignal) {
   return res.json()
 }
 
-async function itunes(q: string, media: string, entity: string, signal: AbortSignal): Promise<CoverHit[]> {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=${media}&entity=${entity}&country=fr&limit=8`
-  const data = (await jsonp(url, signal)) as {
-    results?: { artworkUrl100?: string; trackName?: string; collectionName?: string }[]
-  }
-  return (data.results ?? []).flatMap((r) =>
-    r.artworkUrl100
-      ? [
-          {
-            url: r.artworkUrl100.replace('100x100bb', '600x600bb'),
-            label: r.trackName ?? r.collectionName ?? q,
-            source: 'iTunes',
-          },
-        ]
-      : [],
+async function imdb(q: string, kind: 'film' | 'series', signal: AbortSignal): Promise<CoverHit[]> {
+  return (await imdbSearch(q, kind, signal)).flatMap((r) =>
+    r.poster ? [{ url: r.poster, label: [r.title, r.year].filter(Boolean).join(' '), source: 'IMDb' }] : [],
   )
 }
 
@@ -79,9 +67,9 @@ async function wikipedia(lang: 'fr' | 'en', q: string, signal: AbortSignal): Pro
 function sourcesFor(category: CultureCategory, q: string, signal: AbortSignal) {
   switch (category) {
     case 'films':
-      return [itunes(q, 'movie', 'movie', signal), wikipedia('en', `${q} film`, signal)]
+      return [imdb(q, 'film', signal), wikipedia('en', `${q} film`, signal)]
     case 'series':
-      return [itunes(q, 'tvShow', 'tvSeason', signal), wikipedia('en', `${q} TV series`, signal)]
+      return [imdb(q, 'series', signal), wikipedia('en', `${q} TV series`, signal)]
     case 'livres':
       return [googleBooks(q, signal), openLibrary(q, signal)]
     case 'jeux-video':

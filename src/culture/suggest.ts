@@ -1,4 +1,5 @@
 import type { CultureCategory } from '../db'
+import { imdbSearch } from './imdb'
 
 export interface Suggestion {
   title: string
@@ -26,11 +27,12 @@ async function getJson(url: string, signal: AbortSignal) {
 
 let jsonpSeq = 0
 
-// iTunes n'autorise pas toujours les appels directs depuis une page web :
+// Certaines sources (IMDb) refusent les appels directs depuis une page web :
 // JSONP (réponse chargée comme un script) contourne cette restriction.
-export function jsonp(url: string, signal: AbortSignal, timeoutMs = 8000): Promise<unknown> {
+// `fixedName` : fonction de rappel imposée par la source, sinon on la choisit.
+export function jsonp(url: string, signal: AbortSignal, fixedName?: string, timeoutMs = 8000): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    const name = `__hubJsonp${++jsonpSeq}`
+    const name = fixedName ?? `__hubJsonp${++jsonpSeq}`
     const w = window as unknown as Record<string, unknown>
     const script = document.createElement('script')
     const cleanup = () => {
@@ -57,33 +59,20 @@ export function jsonp(url: string, signal: AbortSignal, timeoutMs = 8000): Promi
       reject(new Error('Script refusé'))
     }
     signal.addEventListener('abort', onAbort)
-    script.src = `${url}&callback=${name}`
+    script.src = fixedName ? url : `${url}&callback=${name}`
     document.head.appendChild(script)
   })
 }
 
 const year = (date?: string) => date?.slice(0, 4)
 
-interface ItunesResult {
-  trackName?: string
-  collectionName?: string
-  artistName?: string
-  artworkUrl100?: string
-  releaseDate?: string
-  primaryGenreName?: string
-}
-
-async function itunes(q: string, media: 'movie' | 'tvShow', signal: AbortSignal): Promise<Suggestion[]> {
-  const entity = media === 'movie' ? 'movie' : 'tvSeason'
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=${media}&entity=${entity}&country=fr&lang=fr_fr&limit=10`
-  const data = (await jsonp(url, signal)) as { results?: ItunesResult[] }
-  return (data.results ?? []).map((r) => ({
-    // Les saisons arrivent sous la forme « Titre, Saison 2 ».
-    title: (r.trackName ?? r.collectionName ?? '').replace(/,\s*Saison \d+$/i, ''),
-    subtitle: [year(r.releaseDate), media === 'movie' ? r.artistName : undefined].filter(Boolean).join(' · '),
-    cover: r.artworkUrl100?.replace('100x100bb', '600x600bb'),
-    genres: r.primaryGenreName ? [r.primaryGenreName] : [],
-    source: 'iTunes',
+async function imdbSuggestions(q: string, kind: 'film' | 'series', signal: AbortSignal): Promise<Suggestion[]> {
+  return (await imdbSearch(q, kind, signal)).map((r) => ({
+    title: r.title,
+    subtitle: [r.year, r.stars].filter(Boolean).join(' · '),
+    cover: r.poster,
+    genres: [],
+    source: 'IMDb',
   }))
 }
 
@@ -217,9 +206,9 @@ function sourcesFor(category: CultureCategory, q: string): Source[] {
   const wd: Source = { name: 'Wikidata', run: (s) => wikidata(category, q, s) }
   switch (category) {
     case 'films':
-      return [{ name: 'iTunes', run: (s) => itunes(q, 'movie', s) }, wd]
+      return [{ name: 'IMDb', run: (s) => imdbSuggestions(q, 'film', s) }, wd]
     case 'series':
-      return [{ name: 'iTunes', run: (s) => itunes(q, 'tvShow', s) }, wd]
+      return [{ name: 'IMDb', run: (s) => imdbSuggestions(q, 'series', s) }, wd]
     case 'livres':
       return [
         { name: 'Google Livres', run: (s) => googleBooks(q, s) },
