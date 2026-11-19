@@ -308,7 +308,9 @@ export default function Library() {
         {(cat?.id === 'films' || cat?.id === 'series') && (
           <label className="link-btn small-link import-link">
             📥 Importer depuis Watch List (fichier .json)
-            <input type="file" accept=".json,application/json,text/plain" hidden onChange={onImportWatchList} />
+            {/* Pas de filtre accept : sur iPhone, « .json » rend le fichier grisé dans le sélecteur.
+                Le contenu est vérifié à l'import. */}
+            <input type="file" data-import="watchlist" hidden onChange={onImportWatchList} />
           </label>
         )}
         {cat?.id === 'livres' && (
