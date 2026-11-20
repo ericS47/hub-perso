@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 
-// Entrée « Jeux de société » : la ludothèque ou la feuille de route (scores),
-// avec l'accès aux statistiques accolé à la feuille de route.
+// Entrée « Jeux de société » : la ludothèque ou la feuille de route (scores).
+// Les statistiques s'ouvrent depuis l'en-tête de la feuille de route.
 export default function GamesHub() {
   const games = useLiveQuery(() => db.items.where('category').equals('jeux-societe').count(), [], 0)
   const playing = useLiveQuery(() => db.matches.where('status').equals('playing').count(), [], 0)
@@ -23,17 +23,11 @@ export default function GamesHub() {
           <strong>Bibliothèque</strong>
           <span className="muted">{games} jeu(x)</span>
         </Link>
-        <div className="hub-circle-wrap">
-          <Link to="/culture/jeux/scores" className="hub-circle">
-            <span className="hub-circle-icon" aria-hidden="true">📝</span>
-            <strong>Feuille de route</strong>
-            <span className="muted">{playing ? `${playing} en cours` : 'Compter les points'}</span>
-          </Link>
-          <Link to="/culture/jeux/stats" className="hub-stat" aria-label="Statistiques des parties">
-            <span aria-hidden="true">📊</span>
-            <span className="hub-stat-label">Stats</span>
-          </Link>
-        </div>
+        <Link to="/culture/jeux/scores" className="hub-circle">
+          <span className="hub-circle-icon" aria-hidden="true">📝</span>
+          <strong>Feuille de route</strong>
+          <span className="muted">{playing ? `${playing} en cours` : 'Compter les points'}</span>
+        </Link>
       </nav>
     </div>
   )

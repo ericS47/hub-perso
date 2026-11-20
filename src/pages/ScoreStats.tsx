@@ -89,7 +89,7 @@ export default function ScoreStats() {
 
   return (
     <div>
-      <Link to="/culture/jeux" className="back-link">← Jeux de société</Link>
+      <Link to="/culture/jeux/scores" className="back-link">← Feuille de route</Link>
       <header className="page-head">
         <h1>
           <span aria-hidden="true">📊 </span>Statistiques
