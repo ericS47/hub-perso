@@ -55,6 +55,9 @@ export default function ScoreBoard() {
           </h1>
           <p className="muted">Choisis un jeu pour compter les points</p>
         </div>
+        <Link to="/culture/jeux/stats" className="icon-btn stat-btn" aria-label="Statistiques" title="Statistiques">
+          📊
+        </Link>
       </header>
 
       <section aria-label="Favoris">

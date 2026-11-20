@@ -610,3 +610,37 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
   background: var(--bg); border: 1px solid var(--border); color: var(--muted);
 }
 .sign.on { background: #7f1d1d; border-color: #f87171; color: #fecaca; }
+
+/* Page d'entrée des jeux : ronds centrés dans l'espace entre l'en-tête et la barre du bas */
+.hub-page {
+  display: flex; flex-direction: column;
+  min-height: calc(100dvh - 40px - env(safe-area-inset-top) - var(--nav-h) - env(safe-area-inset-bottom));
+}
+.hub-page .hub-circles { flex: 1; align-content: center; align-items: center; margin: 0; padding-bottom: 40px; }
+.hub-circle-wrap { position: relative; }
+.hub-stat {
+  position: absolute; top: -10px; right: -6px; z-index: 1;
+  width: 58px; height: 58px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--on-accent); text-decoration: none; font-size: 1.3rem; line-height: 1;
+  border: 3px solid var(--bg); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+.hub-stat-label { font-size: 0.62rem; font-weight: 800; margin-top: 2px; }
+.stat-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; flex: none; }
+
+/* Statistiques */
+.section-title.no-margin { margin: 0; }
+.stat-me { margin-top: 12px; }
+.me-select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px; font-size: 16px; }
+.stat-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; text-align: center; }
+.stat-kpis > span { display: flex; flex-direction: column; gap: 2px; }
+.stat-kpis strong { font-size: 1.5rem; color: var(--gold-light); }
+.stat-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.stat-bars li { display: flex; align-items: center; gap: 10px; }
+.stat-rank { flex: none; width: 28px; text-align: center; font-size: 1.1rem; color: var(--muted); }
+.stat-body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stat-line { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.stat-line strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-line .muted { white-space: nowrap; }
+.stat-bar { height: 8px; border-radius: 6px; background: var(--surface); overflow: hidden; }
+.stat-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--gold-light)); }

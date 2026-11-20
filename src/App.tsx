@@ -9,6 +9,7 @@ import Library from './pages/Library'
 import GamesHub from './pages/GamesHub'
 import ScoreBoard from './pages/ScoreBoard'
 import MatchPage from './pages/MatchPage'
+import ScoreStats from './pages/ScoreStats'
 import Finance from './pages/Finance'
 import Portfolio from './pages/Portfolio'
 import Notes from './pages/Notes'
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/culture/jeux" element={<GamesHub />} />
           <Route path="/culture/jeux/scores" element={<ScoreBoard />} />
           <Route path="/culture/jeux/partie/:matchId" element={<MatchPage />} />
+          <Route path="/culture/jeux/stats" element={<ScoreStats />} />
           <Route path="/culture/liste/:listId" element={<Library />} />
           <Route path="/culture/:category" element={<Library />} />
           <Route path="/finance" element={<Finance />} />
