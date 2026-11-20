@@ -61,3 +61,24 @@ export async function lastPlayers(gameId: number) {
 export function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
+
+export interface Ranked {
+  name: string
+  total: number
+  // Rang avec ex æquo : deux joueurs à égalité partagent la même place.
+  rank: number
+}
+
+// Classement du meilleur au moins bon selon la règle du jeu.
+export function ranking(match: Rules): Ranked[] {
+  const t = totals(match)
+  const sorted = match.players
+    .map((name, i) => ({ name, total: t[i] }))
+    .sort((a, b) => (match.rule === 'high' ? b.total - a.total : a.total - b.total))
+  return sorted.map((r) => ({ ...r, rank: sorted.findIndex((s) => s.total === r.total) + 1 }))
+}
+
+// Totaux après chaque manche (0 = départ), pour suivre l'évolution de la partie.
+export function progression(match: Rules) {
+  return Array.from({ length: match.rounds.length + 1 }, (_, k) => totals({ ...match, rounds: match.rounds.slice(0, k) }))
+}

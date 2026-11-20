@@ -3,8 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Match } from '../db'
 import { ruleLabel } from '../scores/catalog'
-import { formatDate, leaders, targetReached, totals } from '../scores/logic'
+import { formatDate, leaders, progression, ranking, targetReached, totals } from '../scores/logic'
 import RoundSheet from '../components/scores/RoundSheet'
+import Podium from '../components/scores/Podium'
+import ScoreChart from '../components/scores/ScoreChart'
 
 // Feuille de score d'une partie : une colonne par joueur, une ligne par manche.
 export default function MatchPage() {
@@ -82,25 +84,35 @@ export default function MatchPage() {
         </div>
       )}
 
-      <div className="score-totals">
-        {m.players.map((p, i) => {
-          const lead = m.rounds.length > 0 && top.includes(p)
-          return (
-            <div key={p} className={lead ? 'total-card lead' : 'total-card'}>
-              <span className="total-name">
-                {lead && <span aria-label="en tête">👑 </span>}
-                {p}
-              </span>
-              <span className="total-value">{t[i]}</span>
-              {m.target && (
-                <span className="total-bar" aria-hidden="true">
-                  <span style={{ width: `${Math.min(100, Math.max(0, (t[i] / m.target) * 100))}%` }} />
+      {/* Partie terminée : récapitulatif (podium et évolution) à la place des totaux. */}
+      {finished && m.rounds.length > 0 && (
+        <>
+          <Podium ranked={ranking(m)} />
+          <ScoreChart players={m.players} series={progression(m)} target={m.target} />
+        </>
+      )}
+
+      {!finished && (
+        <div className="score-totals">
+          {m.players.map((p, i) => {
+            const lead = m.rounds.length > 0 && top.includes(p)
+            return (
+              <div key={p} className={lead ? 'total-card lead' : 'total-card'}>
+                <span className="total-name">
+                  {lead && <span aria-label="en tête">👑 </span>}
+                  {p}
                 </span>
-              )}
-            </div>
-          )
-        })}
-      </div>
+                <span className="total-value">{t[i]}</span>
+                {m.target && (
+                  <span className="total-bar" aria-hidden="true">
+                    <span style={{ width: `${Math.min(100, Math.max(0, (t[i] / m.target) * 100))}%` }} />
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <div className="score-table-wrap">
         <table className="score-table">
