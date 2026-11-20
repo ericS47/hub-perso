@@ -135,7 +135,7 @@ export default function ScoreBoard() {
                 <span className="match-text">
                   <strong>{g.name}</strong>
                   <span className="muted small-text">
-                    {ruleLabel(g.rule, g.target)}
+                    {ruleLabel(g)}
                     {plays(g) > 0 && ` · ${plays(g)} partie(s)`}
                   </span>
                 </span>

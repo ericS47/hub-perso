@@ -69,7 +69,7 @@ export default function NewMatchSheet({ game, onClose, onEdit }: Props) {
   return (
     <Sheet title={`${game.icon} ${game.name}`} onClose={onClose}>
       <p className="muted small-text sheet-sub">
-        {ruleLabel(game.rule, game.target)} ·{' '}
+        {ruleLabel(game)} ·{' '}
         <button type="button" className="link-btn small-link inline" onClick={onEdit}>
           modifier le jeu
         </button>

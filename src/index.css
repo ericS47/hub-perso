@@ -635,3 +635,9 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .stat-line .muted { white-space: nowrap; }
 .stat-bar { height: 8px; border-radius: 6px; background: var(--surface); overflow: hidden; }
 .stat-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--gold-light)); }
+
+/* Saisie d'une manche : part proposée au dernier joueur */
+.round-field.suggested::placeholder { color: var(--accent); opacity: 1; font-weight: 700; }
+.round-field.suggested { border-color: var(--accent); }
+.round-hint { margin: 0; font-size: 0.85rem; color: var(--gold-light); }
+.round-hint.warn { color: #fca5a5; }

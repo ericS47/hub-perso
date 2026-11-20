@@ -67,7 +67,7 @@ export default function MatchPage() {
           {m.gameName}
         </h1>
         <p className="muted">
-          {ruleLabel(m.rule, m.target)} · {formatDate(m.createdAt)}
+          {ruleLabel(m)} · {formatDate(m.createdAt)}
         </p>
       </header>
 
@@ -182,6 +182,7 @@ export default function MatchPage() {
         <RoundSheet
           key={String(round)}
           players={m.players}
+          roundTotal={m.roundTotal}
           round={round === 'new' ? undefined : { index: round, points: m.rounds[round] }}
           onSave={saveRound}
           onDelete={round === 'new' ? undefined : () => save({ rounds: m.rounds.filter((_, i) => i !== round) })}

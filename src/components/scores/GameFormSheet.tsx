@@ -16,6 +16,9 @@ export default function GameFormSheet({ game, defaultCategory, onClose }: Props)
   const [icon, setIcon] = useState(game?.icon ?? '')
   const [rule, setRule] = useState<ScoreRule>(game?.rule ?? 'high')
   const [target, setTarget] = useState(game?.target ? String(game.target) : '')
+  const [roundTotal, setRoundTotal] = useState(game?.roundTotal !== undefined ? String(game.roundTotal) : '')
+  const [overshoot, setOvershoot] = useState<'' | 'reset' | 'bust'>(game?.overshoot ?? '')
+  const [resetTo, setResetTo] = useState(game?.resetTo !== undefined ? String(game.resetTo) : '25')
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
@@ -27,6 +30,10 @@ export default function GameFormSheet({ game, defaultCategory, onClose }: Props)
       icon: icon.trim() || SCORE_CATEGORIES.find((c) => c.id === category)!.icon,
       rule,
       target: Number(target) > 0 ? Number(target) : undefined,
+      // Vide : pas de total fixe ; 0 : manche à somme nulle (Tarot).
+      roundTotal: roundTotal === '' ? undefined : Number(roundTotal),
+      overshoot: Number(target) > 0 && overshoot ? overshoot : undefined,
+      resetTo: Number(target) > 0 && overshoot === 'reset' ? Number(resetTo) || 0 : undefined,
     }
     if (game?.id !== undefined) await db.scoreGames.update(game.id, data)
     else await db.scoreGames.add({ ...data, favorite: false, createdAt: Date.now() })
@@ -93,6 +100,51 @@ export default function GameFormSheet({ game, defaultCategory, onClose }: Props)
             inputMode="numeric"
             placeholder={rule === 'high' ? 'ex. 50 pour le Mölkky' : 'ex. 100 pour le Skyjo'}
           />
+        </label>
+        {Number(target) > 0 && (
+          <div className="field-label">
+            Si un joueur dépasse {target}
+            <div className="segmented">
+              {(
+                [
+                  ['', 'Il gagne'],
+                  ['reset', 'Il retombe à…'],
+                  ['bust', 'La manche ne compte pas'],
+                ] as const
+              ).map(([v, label]) => (
+                <button
+                  key={v}
+                  type="button"
+                  className={overshoot === v ? 'chip small active' : 'chip small'}
+                  aria-pressed={overshoot === v}
+                  onClick={() => setOvershoot(v)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {overshoot === 'reset' && (
+              <input
+                className="field"
+                value={resetTo}
+                onChange={(e) => setResetTo(e.target.value.replace(/\D/g, ''))}
+                inputMode="numeric"
+                aria-label="Score auquel il retombe"
+                placeholder="ex. 25 au Mölkky"
+              />
+            )}
+          </div>
+        )}
+        <label className="field-label">
+          Points distribués à chaque manche (facultatif)
+          <input
+            className="field"
+            value={roundTotal}
+            onChange={(e) => setRoundTotal(e.target.value.replace(/\D/g, ''))}
+            inputMode="numeric"
+            placeholder="ex. 250 au Papayoo, 162 à la Belote, 0 au Tarot"
+          />
+          <span className="muted small-text">La part du dernier joueur sera calculée et proposée.</span>
         </label>
         <label className="field-label">
           Icône (un émoji, facultatif)

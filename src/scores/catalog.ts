@@ -12,13 +12,37 @@ export const SCORE_CATEGORIES: { id: ScoreCategory; label: string; icon: string 
   { id: 'exterieur', label: 'Extérieur', icon: '🌳' },
 ]
 
-export interface CatalogGame {
+// Règles de comptage d'un jeu.
+export interface ScoreRules {
+  rule: ScoreRule
+  target?: number
+  // Points distribués à chaque manche, toujours les mêmes (Papayoo 250,
+  // Belote 162, Tarot 0) : la part du dernier joueur se déduit des autres.
+  roundTotal?: number
+  // Dépasser le score de fin : « reset » = retombe à resetTo (Mölkky),
+  // « bust » = la manche ne compte pas (fléchettes). Il faut alors finir pile.
+  overshoot?: 'reset' | 'bust'
+  resetTo?: number
+}
+
+export interface CatalogGame extends ScoreRules {
   slug: string
   name: string
   category: ScoreCategory
   icon: string
-  rule: ScoreRule
-  target?: number
+}
+
+// Règles particulières des jeux de la liste de départ.
+export const EXTRA_RULES: Record<string, Partial<ScoreRules>> = {
+  papayoo: { roundTotal: 250 },
+  belote: { roundTotal: 162 },
+  coinche: { roundTotal: 162 },
+  manille: { roundTotal: 60 },
+  'dame-de-pique': { roundTotal: 26 },
+  tarot: { roundTotal: 0 },
+  molkky: { overshoot: 'reset', resetTo: 25 },
+  'flechettes-301': { overshoot: 'bust' },
+  'flechettes-501': { overshoot: 'bust' },
 }
 
 type Row = [slug: string, name: string, icon: string, rule: ScoreRule, target?: number]
@@ -152,7 +176,7 @@ const EXTERIEUR: Row[] = [
 ]
 
 const build = (rows: Row[], category: ScoreCategory): CatalogGame[] =>
-  rows.map(([slug, name, icon, rule, target]) => ({ slug, name, category, icon, rule, target }))
+  rows.map(([slug, name, icon, rule, target]) => ({ slug, name, category, icon, rule, target, ...EXTRA_RULES[slug] }))
 
 export const CATALOG: CatalogGame[] = [
   ...build(SOCIETE, 'societe'),
@@ -160,7 +184,18 @@ export const CATALOG: CatalogGame[] = [
   ...build(EXTERIEUR, 'exterieur'),
 ]
 
-export function ruleLabel(rule: ScoreRule, target?: number) {
-  if (rule === 'high') return target ? `Premier à ${target} points` : 'Le plus de points gagne'
-  return target ? `Fin à ${target} points · le moins gagne` : 'Le moins de points gagne'
+export function ruleLabel(r: ScoreRules) {
+  const parts = [
+    r.rule === 'high'
+      ? r.target
+        ? `Premier à ${r.target} points${r.overshoot ? ' pile' : ''}`
+        : 'Le plus de points gagne'
+      : r.target
+        ? `Fin à ${r.target} points · le moins gagne`
+        : 'Le moins de points gagne',
+  ]
+  if (r.overshoot === 'reset') parts.push(`au-delà, retour à ${r.resetTo ?? 0}`)
+  if (r.overshoot === 'bust') parts.push('au-delà, la manche ne compte pas')
+  if (r.roundTotal !== undefined) parts.push(r.roundTotal === 0 ? 'manche à somme nulle' : `${r.roundTotal} pts par manche`)
+  return parts.join(' · ')
 }

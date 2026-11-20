@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import { DEFAULT_THEMES } from './culture/defaultThemes'
-import { CATALOG, type ScoreCategory, type ScoreRule } from './scores/catalog'
+import { CATALOG, EXTRA_RULES, type ScoreCategory, type ScoreRules } from './scores/catalog'
 
 export interface Task {
   id?: number
@@ -74,15 +74,13 @@ export interface CultureTheme {
 }
 
 // Feuille de route : jeu dont on compte les points.
-export interface ScoreGame {
+export interface ScoreGame extends ScoreRules {
   id?: number
   // Identifiant des jeux de la liste de départ (absent pour un jeu ajouté).
   slug?: string
   name: string
   category: ScoreCategory
   icon: string
-  rule: ScoreRule
-  target?: number
   favorite: boolean
   createdAt: number
 }
@@ -95,13 +93,12 @@ export interface Player {
 }
 
 // Une partie : rounds[manche][joueur] = points marqués.
-export interface Match {
+// Les règles du jeu sont recopiées : modifier le jeu ne change pas les parties jouées.
+export interface Match extends ScoreRules {
   id?: number
   gameId: number
   gameName: string
   gameIcon: string
-  rule: ScoreRule
-  target?: number
   players: string[]
   rounds: number[][]
   status: 'playing' | 'finished'
@@ -209,6 +206,29 @@ class HubDB extends Dexie {
         matches: '++id, gameId, status, updatedAt',
       })
       .upgrade((tx) => tx.table('scoreGames').bulkAdd(seedScoreGames()))
+    // Version 8 : règles détaillées (points par manche, dépassement) des jeux de départ.
+    this.version(8)
+      .stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+        labels: '++id, parentId, createdAt',
+        notes: '++id, labelId, updatedAt',
+        themes: '++id, category, createdAt',
+        scoreGames: '++id, slug, category, name',
+        players: '++id, name',
+        matches: '++id, gameId, status, updatedAt',
+      })
+      .upgrade((tx) =>
+        tx
+          .table('scoreGames')
+          .toCollection()
+          .modify((g: ScoreGame) => {
+            if (g.slug && EXTRA_RULES[g.slug]) Object.assign(g, EXTRA_RULES[g.slug])
+          }),
+      )
     // Base toute neuve : les upgrades ne tournent pas, on crée les listes ici.
     this.on('populate', async (tx) => {
       await tx.table('themes').bulkAdd(seedThemes([]))
