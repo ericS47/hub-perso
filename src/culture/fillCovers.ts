@@ -40,7 +40,13 @@ async function bestCover(category: CultureCategory, title: string, signal: Abort
   const pick = exact ?? close
   if (pick?.cover) return pick.cover
   const { hits } = await searchCovers(category, title, signal)
-  return hits[0]?.url
+  // Films et séries : IMDb trouve la bonne affiche même d'après le titre français
+  // (« Le Parrain » → The Godfather), son premier résultat est fiable.
+  if (category === 'films' || category === 'series') return hits[0]?.url
+  // Ailleurs (Wikipédia) le premier résultat est souvent hors sujet
+  // (« Symbiose » → un club de football) : il faut que le titre corresponde.
+  const label = (l: string) => norm(l.replace(/\s*\([^)]*\)\s*$/, ''))
+  return hits.find((h) => label(h.label) === target || label(h.label).startsWith(target))?.url
 }
 
 export interface FillProgress {

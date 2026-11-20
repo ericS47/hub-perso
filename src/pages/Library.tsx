@@ -5,6 +5,7 @@ import { db, type CultureItem, type CultureList, type CultureTheme, type Ownersh
 import { categoryOf, doneLabel } from '../culture/categories'
 import { importBabelio } from '../culture/babelio'
 import { importWatchList } from '../culture/watchlist'
+import { importMyludo } from '../culture/myludo'
 import { fillMissingCovers, type FillProgress } from '../culture/fillCovers'
 import Coverflow from '../components/Coverflow'
 import CoverImage from '../components/CoverImage'
@@ -171,6 +172,21 @@ export default function Library() {
     )
   }
 
+  async function onImportMyludo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const r = await importMyludo(file)
+      const parts = [`${r.added} jeu(x) importé(s)${r.added ? (r.wishlist ? ' en « Envie »' : " en « Je l'ai »") : ''}`]
+      if (r.updated) parts.push(`${r.updated} complété(s)`)
+      if (r.skipped) parts.push(`${r.skipped} déjà à jour`)
+      window.alert(parts.join(', ') + '.' + (r.added ? ' Touche « Trouver les affiches manquantes » pour les boîtes.' : ''))
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Import impossible.')
+    }
+  }
+
   async function onImportWatchList(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = ''
@@ -304,6 +320,13 @@ export default function Library() {
                 ? 'Vérification des images… (toucher pour arrêter)'
                 : `Recherche des affiches ${filling.done}/${filling.total}… (toucher pour arrêter)`}
           </button>
+        )}
+        {cat?.id === 'jeux-societe' && (
+          <label className="link-btn small-link import-link">
+            📥 Importer depuis Myludo (fichier .json)
+            {/* Pas de filtre accept : sur iPhone, « .json » rend le fichier grisé. */}
+            <input type="file" data-import="myludo" hidden onChange={onImportMyludo} />
+          </label>
         )}
         {(cat?.id === 'films' || cat?.id === 'series') && (
           <label className="link-btn small-link import-link">
