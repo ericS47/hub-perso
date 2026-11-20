@@ -36,7 +36,12 @@ export default function Culture() {
 
       <div className="category-grid">
         {CATEGORIES.map((c) => (
-          <Link key={c.id} to={`/culture/${c.id}`} className="card category-card">
+          <Link
+            key={c.id}
+            // Jeux de société : page d'entrée (bibliothèque ou feuille de route).
+            to={c.id === 'jeux-societe' ? '/culture/jeux' : `/culture/${c.id}`}
+            className="card category-card"
+          >
             <span className="category-icon" aria-hidden="true">{c.icon}</span>
             <strong>{c.label}</strong>
             <span className="muted">{counts[c.id] ?? 0} élément(s)</span>

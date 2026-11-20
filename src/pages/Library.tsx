@@ -227,7 +227,11 @@ export default function Library() {
 
   return (
     <div>
-      <Link to="/culture" className="back-link">← Culture</Link>
+      {cat?.id === 'jeux-societe' ? (
+        <Link to="/culture/jeux" className="back-link">← Jeux de société</Link>
+      ) : (
+        <Link to="/culture" className="back-link">← Culture</Link>
+      )}
       <header className="page-head culture-head">
         <div>
           <h1>

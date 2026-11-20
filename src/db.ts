@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import { DEFAULT_THEMES } from './culture/defaultThemes'
+import { CATALOG, type ScoreCategory, type ScoreRule } from './scores/catalog'
 
 export interface Task {
   id?: number
@@ -72,6 +73,43 @@ export interface CultureTheme {
   createdAt: number
 }
 
+// Feuille de route : jeu dont on compte les points.
+export interface ScoreGame {
+  id?: number
+  // Identifiant des jeux de la liste de départ (absent pour un jeu ajouté).
+  slug?: string
+  name: string
+  category: ScoreCategory
+  icon: string
+  rule: ScoreRule
+  target?: number
+  favorite: boolean
+  createdAt: number
+}
+
+// Nom enregistré pour les prochaines parties.
+export interface Player {
+  id?: number
+  name: string
+  createdAt: number
+}
+
+// Une partie : rounds[manche][joueur] = points marqués.
+export interface Match {
+  id?: number
+  gameId: number
+  gameName: string
+  gameIcon: string
+  rule: ScoreRule
+  target?: number
+  players: string[]
+  rounds: number[][]
+  status: 'playing' | 'finished'
+  winners?: string[]
+  createdAt: number
+  updatedAt: number
+}
+
 // labelId = 0 : note sans étiquette.
 export interface Note {
   id?: number
@@ -91,6 +129,9 @@ class HubDB extends Dexie {
   labels!: Table<NoteLabel, number>
   notes!: Table<Note, number>
   themes!: Table<CultureTheme, number>
+  scoreGames!: Table<ScoreGame, number>
+  players!: Table<Player, number>
+  matches!: Table<Match, number>
 
   constructor() {
     super('hub')
@@ -152,9 +193,33 @@ class HubDB extends Dexie {
         const items = (await tx.table('items').toArray()) as CultureItem[]
         await tx.table('themes').bulkAdd(seedThemes(items))
       })
-    // Base toute neuve : les upgrades ne tournent pas, on crée la liste ici.
-    this.on('populate', (tx) => tx.table('themes').bulkAdd(seedThemes([])))
+    // Version 7 : feuille de route (jeux à points, joueurs, parties).
+    this.version(7)
+      .stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+        labels: '++id, parentId, createdAt',
+        notes: '++id, labelId, updatedAt',
+        themes: '++id, category, createdAt',
+        scoreGames: '++id, slug, category, name',
+        players: '++id, name',
+        matches: '++id, gameId, status, updatedAt',
+      })
+      .upgrade((tx) => tx.table('scoreGames').bulkAdd(seedScoreGames()))
+    // Base toute neuve : les upgrades ne tournent pas, on crée les listes ici.
+    this.on('populate', async (tx) => {
+      await tx.table('themes').bulkAdd(seedThemes([]))
+      await tx.table('scoreGames').bulkAdd(seedScoreGames())
+    })
   }
+}
+
+function seedScoreGames(): ScoreGame[] {
+  const now = Date.now()
+  return CATALOG.map((g, i) => ({ ...g, favorite: false, createdAt: now + i }))
 }
 
 function seedThemes(items: CultureItem[]): CultureTheme[] {
