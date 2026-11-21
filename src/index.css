@@ -694,3 +694,11 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .warn-text { color: #fca5a5; }
 .cover.contain { background: #fff; }
 .cover.contain img { object-fit: contain; padding: 6px; }
+
+/* Comparer les prix (LEGO) */
+.price-btn { align-self: stretch; }
+.price-group { margin-bottom: 14px; }
+.price-group h3 { margin: 0; font-size: 0.95rem; color: var(--gold-light); }
+.price-group p { margin: 2px 0 8px; }
+.price-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.price-links .chip { text-decoration: none; color: var(--text); }

@@ -12,6 +12,7 @@ import CoverImage from '../components/CoverImage'
 import ItemForm from '../components/ItemForm'
 import ThemeRows, { NO_THEME } from '../components/ThemeRows'
 import ThemeManager from '../components/ThemeManager'
+import PriceSheet from '../components/PriceSheet'
 
 type Filter = 'all' | 'priority' | 'owned' | 'wish' | 'done' | 'todo'
 type View = 'carousel' | 'grid' | 'themes'
@@ -77,6 +78,7 @@ export default function Library() {
   const [focusId, setFocusId] = useState<number>()
   const [editing, setEditing] = useState<CultureItem | 'new'>()
   const [managing, setManaging] = useState(false)
+  const [pricing, setPricing] = useState<CultureItem>()
   const [filling, setFilling] = useState<FillProgress | 'checking'>()
   const fillAbort = useRef<AbortController | null>(null)
   useEffect(() => () => fillAbort.current?.abort(), [])
@@ -417,6 +419,11 @@ export default function Library() {
                   ★ Conseillé
                 </button>
               </div>
+              {centered.category === 'lego' && (
+                <button type="button" className="btn ghost price-btn" onClick={() => setPricing(centered)}>
+                  💶 Comparer les prix
+                </button>
+              )}
               <button type="button" className="link-btn small-link" onClick={() => setEditing(centered)}>
                 Modifier, couverture, listes…
               </button>
@@ -447,6 +454,9 @@ export default function Library() {
         </div>
       )}
 
+      {pricing && (
+        <PriceSheet reference={pricing.reference} title={pricing.title} onClose={() => setPricing(undefined)} />
+      )}
       {managing && cat && <ThemeManager category={cat.id} items={inTab} onClose={() => setManaging(false)} />}
 
       {editing && (
