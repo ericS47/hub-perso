@@ -122,6 +122,8 @@ const WIKIDATA_TYPE: Record<CultureCategory, RegExp> = {
   'jeux-societe': /jeu de société|jeu de cartes|jeu de plateau|jeu de rôle|board game|card game|tabletop/i,
   livres: /roman|livre|bande dessinée|manga|essai|recueil|nouvelle|novel|book|comic|biographi|poè|saga/i,
   spectacles: /spectacle|théâtre|comédie musicale|opéra|ballet|cirque|humour|humoriste|one[- ]man|show|tournée|musical|play/i,
+  lego: /lego/i,
+  puzzles: /puzzle|casse-tête/i,
 }
 
 interface WikidataHit {

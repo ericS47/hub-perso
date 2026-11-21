@@ -9,7 +9,15 @@ export interface Task {
   createdAt: number
 }
 
-export type CultureCategory = 'films' | 'series' | 'jeux-societe' | 'jeux-video' | 'livres' | 'spectacles'
+export type CultureCategory =
+  | 'films'
+  | 'series'
+  | 'jeux-societe'
+  | 'jeux-video'
+  | 'livres'
+  | 'spectacles'
+  | 'lego'
+  | 'puzzles'
 
 // Possession : « Je l'ai » (dans ma collection), « Envie » (à acquérir) ou ni l'un ni l'autre.
 export type Ownership = 'owned' | 'wish' | 'none'
@@ -229,6 +237,28 @@ class HubDB extends Dexie {
             if (g.slug && EXTRA_RULES[g.slug]) Object.assign(g, EXTRA_RULES[g.slug])
           }),
       )
+    // Version 9 : catégories LEGO et Puzzles, avec leurs thèmes de départ.
+    this.version(9)
+      .stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+        labels: '++id, parentId, createdAt',
+        notes: '++id, labelId, updatedAt',
+        themes: '++id, category, createdAt',
+        scoreGames: '++id, slug, category, name',
+        players: '++id, name',
+        matches: '++id, gameId, status, updatedAt',
+      })
+      .upgrade(async (tx) => {
+        const now = Date.now()
+        const add = (['lego', 'puzzles'] as const).flatMap((category) =>
+          DEFAULT_THEMES[category].map((name, i) => ({ category, name, createdAt: now + i })),
+        )
+        await tx.table('themes').bulkAdd(add)
+      })
     // Base toute neuve : les upgrades ne tournent pas, on crée les listes ici.
     this.on('populate', async (tx) => {
       await tx.table('themes').bulkAdd(seedThemes([]))

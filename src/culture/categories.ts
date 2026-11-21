@@ -7,6 +7,8 @@ export const CATEGORIES: { id: CultureCategory; label: string; icon: string; don
   { id: 'jeux-video', label: 'Jeux vidéo', icon: '🎮', done: 'Joué' },
   { id: 'livres', label: 'Livres', icon: '📚', done: 'Lu' },
   { id: 'spectacles', label: 'Spectacles', icon: '🎭', done: 'Vu' },
+  { id: 'lego', label: 'LEGO', icon: '🧱', done: 'Construit' },
+  { id: 'puzzles', label: 'Puzzles', icon: '🧩', done: 'Fait' },
 ]
 
 export const OWNERSHIP: { id: Ownership; label: string }[] = [

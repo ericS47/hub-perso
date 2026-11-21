@@ -682,3 +682,11 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 .chart-tip span { display: flex; align-items: center; gap: 6px; }
+
+/* Icône « Mes listes perso » de la page Culture, avec le nombre de listes */
+.lists-btn { position: relative; flex: none; }
+.icon-badge {
+  position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 9px; background: var(--accent); color: var(--on-accent);
+  font-size: 0.7rem; font-weight: 800; line-height: 18px; text-align: center;
+}

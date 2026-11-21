@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type CultureList } from '../db'
 import { CATEGORIES } from '../culture/categories'
+import Sheet from '../components/Sheet'
 
 export default function Culture() {
   const counts = useLiveQuery(
@@ -10,6 +11,7 @@ export default function Culture() {
       const items = await db.items.toArray()
       return items.reduce<Record<string, number>>((acc, item) => {
         acc[item.category] = (acc[item.category] ?? 0) + 1
+        for (const id of item.listIds) acc[`liste-${id}`] = (acc[`liste-${id}`] ?? 0) + 1
         return acc
       }, {})
     },
@@ -18,6 +20,7 @@ export default function Culture() {
   )
   const lists = useLiveQuery(() => db.lists.orderBy('createdAt').toArray(), [], [] as CultureList[])
   const [name, setName] = useState('')
+  const [showLists, setShowLists] = useState(false)
 
   async function createList(e: React.FormEvent) {
     e.preventDefault()
@@ -29,9 +32,22 @@ export default function Culture() {
 
   return (
     <div>
-      <header className="page-head">
-        <h1>Culture</h1>
-        <p className="muted">Ta bibliothèque par catégorie</p>
+      <header className="page-head culture-head">
+        <div>
+          <h1>Culture</h1>
+          <p className="muted">Ta bibliothèque par catégorie</p>
+        </div>
+        {/* Listes perso : rangées derrière une icône pour alléger la page. */}
+        <button
+          type="button"
+          className="icon-btn lists-btn"
+          onClick={() => setShowLists(true)}
+          aria-label="Mes listes perso"
+          title="Mes listes perso"
+        >
+          📝
+          {lists.length > 0 && <span className="icon-badge">{lists.length}</span>}
+        </button>
       </header>
 
       <div className="category-grid">
@@ -49,29 +65,40 @@ export default function Culture() {
         ))}
       </div>
 
-      <section className="card">
-        <h2>Mes listes perso</h2>
-        <form className="task-form" onSubmit={createList}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nouvelle liste (ex. Vacances)"
-            aria-label="Nouvelle liste"
-          />
-          <button type="submit" className="btn">Créer</button>
-        </form>
-        {lists.length === 0 ? (
-          <p className="muted">Aucune liste pour l'instant.</p>
-        ) : (
-          <ul className="plain-list">
-            {lists.map((l) => (
-              <li key={l.id}>
-                <Link to={`/culture/liste/${l.id}`}>{l.name}</Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {showLists && (
+        <Sheet title="📝 Mes listes perso" onClose={() => setShowLists(false)}>
+          <form className="task-form" onSubmit={createList}>
+            <input
+              className="field"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nouvelle liste (ex. Vacances)"
+              aria-label="Nouvelle liste"
+            />
+            <button type="submit" className="btn">
+              Créer
+            </button>
+          </form>
+          {lists.length === 0 ? (
+            <p className="muted">Aucune liste pour l'instant.</p>
+          ) : (
+            <ul className="match-list">
+              {lists.map((l) => (
+                <li key={l.id}>
+                  <Link to={`/culture/liste/${l.id}`} className="match-row">
+                    <span className="match-icon" aria-hidden="true">📝</span>
+                    <span className="match-text">
+                      <strong>{l.name}</strong>
+                      <span className="muted small-text">{counts[`liste-${l.id}`] ?? 0} œuvre(s)</span>
+                    </span>
+                    <span className="match-go">›</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Sheet>
+      )}
     </div>
   )
 }

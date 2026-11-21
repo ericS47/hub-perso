@@ -78,6 +78,10 @@ function sourcesFor(category: CultureCategory, q: string, signal: AbortSignal) {
       return [wikipedia('en', `${q} board game`, signal), wikipedia('fr', `${q} jeu de société`, signal)]
     case 'spectacles':
       return [wikipedia('fr', q, signal), wikipedia('en', q, signal)]
+    case 'lego':
+      return [wikipedia('en', `LEGO ${q}`, signal), wikipedia('fr', `LEGO ${q}`, signal)]
+    case 'puzzles':
+      return [wikipedia('fr', `${q} puzzle`, signal), wikipedia('en', `${q} jigsaw puzzle`, signal)]
   }
 }
 
