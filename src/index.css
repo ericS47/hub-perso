@@ -702,3 +702,14 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .price-group p { margin: 2px 0 8px; }
 .price-links { display: flex; flex-wrap: wrap; gap: 6px; }
 .price-links .chip { text-decoration: none; color: var(--text); }
+
+/* Scanner de code-barres */
+.ref-row { display: flex; gap: 8px; }
+.ref-row .field { flex: 1; min-width: 0; }
+.scan-btn { flex: none; white-space: nowrap; }
+.scanner { position: relative; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 4 / 3; margin-bottom: 10px; }
+.scanner-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scanner-frame {
+  position: absolute; left: 12%; right: 12%; top: 32%; bottom: 32%;
+  border: 3px solid var(--accent); border-radius: 10px; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
+}
