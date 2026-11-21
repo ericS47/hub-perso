@@ -109,7 +109,7 @@ export default function Library() {
   const visible = inTab
     .filter((i) => matches(i, filter))
     .filter((i) => !activeGenre || (activeGenre === NO_THEME ? i.genres.length === 0 : i.genres.includes(activeGenre)))
-    .filter((i) => !q || i.title.toLowerCase().includes(q))
+    .filter((i) => !q || i.title.toLowerCase().includes(q) || !!i.reference?.includes(q))
     .sort((a, b) => Number(b.priority) - Number(a.priority) || b.createdAt - a.createdAt)
 
   // Rangées par thème : les thèmes les plus fournis d'abord.
@@ -377,6 +377,7 @@ export default function Library() {
               <p className="muted small-text">
                 {categoryOf(centered.category)?.icon} {categoryOf(centered.category)?.label}
                 {centered.creator && ` · ${centered.creator}`}
+                {centered.reference && ` · Réf. ${centered.reference}`}
                 {centered.genres.length > 0 && ` · ${centered.genres.join(', ')}`}
               </p>
               {centered.priority && (

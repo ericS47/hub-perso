@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type CultureCategory, type CultureItem, type CultureList, type CultureTheme, type Ownership } from '../db'
 import { CATEGORIES, OWNERSHIP, doneLabel, parseGenres } from '../culture/categories'
 import type { Suggestion } from '../culture/suggest'
 import { ensureThemes } from '../culture/themes'
+import { legoImage, legoRef } from '../culture/lego'
+import { loads } from '../culture/fillCovers'
 import CoverPicker from './CoverPicker'
 import TitleAutocomplete from './TitleAutocomplete'
 import Sheet from './Sheet'
@@ -21,6 +23,8 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
   const [title, setTitle] = useState(item?.title ?? '')
   const [category, setCategory] = useState<CultureCategory>(item?.category ?? defaultCategory)
   const [cover, setCover] = useState(item?.cover)
+  const [reference, setReference] = useState(item?.reference ?? '')
+  const [refStatus, setRefStatus] = useState<'idle' | 'checking' | 'found' | 'unknown'>('idle')
   const [ownership, setOwnership] = useState<Ownership>(item?.ownership ?? 'owned')
   const [seen, setSeen] = useState(item?.seen ?? false)
   const [priority, setPriority] = useState(item?.priority ?? false)
@@ -57,6 +61,27 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
     if (s.genres.length) setGenres((gs) => parseGenres([...gs, ...s.genres].join(',')))
   }
 
+  // LEGO : dès que le numéro de set est reconnu, la boîte devient la couverture
+  // (sauf photo importée), et un titre provisoire est proposé s'il est vide.
+  useEffect(() => {
+    const ref = category === 'lego' ? legoRef(reference) : undefined
+    if (!ref) return
+    let alive = true
+    const timer = window.setTimeout(async () => {
+      setRefStatus('checking')
+      const ok = await loads(legoImage(ref))
+      if (!alive) return
+      setRefStatus(ok ? 'found' : 'unknown')
+      if (!ok) return
+      setCover((c) => (c?.startsWith('data:') ? c : legoImage(ref)))
+      setTitle((t) => t || `LEGO ${ref.replace(/-1$/, '')}`)
+    }, 400)
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+    }
+  }, [category, reference])
+
   function toggleList(id: number) {
     setListIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
   }
@@ -69,6 +94,7 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
       title: clean,
       category,
       cover,
+      reference: category === 'lego' ? reference.trim() || undefined : item?.reference,
       ownership,
       seen,
       priority,
@@ -106,12 +132,38 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
           </select>
         </label>
 
+        {category === 'lego' && (
+          <label className="field-label">
+            Numéro du set (sur la boîte, ex. 75192)
+            <input
+              className="field"
+              value={reference}
+              onChange={(e) => {
+                setReference(e.target.value.replace(/[^\d-]/g, ''))
+                setRefStatus('idle')
+              }}
+              inputMode="numeric"
+              placeholder="75192"
+              autoFocus={!item}
+            />
+            <span className={refStatus === 'unknown' ? 'muted small-text warn-text' : 'muted small-text'}>
+              {refStatus === 'checking'
+                ? 'Recherche de la boîte…'
+                : refStatus === 'found'
+                  ? '✓ Boîte trouvée et ajoutée comme image'
+                  : refStatus === 'unknown'
+                    ? 'Numéro inconnu : vérifie-le sur la boîte, ou ajoute une photo'
+                    : "L'image de la boîte est ajoutée automatiquement"}
+            </span>
+          </label>
+        )}
+
         <div className="field-label">
           Titre
           <TitleAutocomplete
             value={title}
             category={category}
-            autoFocus={!item}
+            autoFocus={!item && category !== 'lego'}
             onChange={setTitle}
             onPick={pickSuggestion}
           />

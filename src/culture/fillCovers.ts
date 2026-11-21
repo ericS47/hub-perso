@@ -1,6 +1,7 @@
 import { db, type CultureCategory, type CultureItem } from '../db'
 import { suggest } from './suggest'
 import { searchCovers } from './coverSearch'
+import { legoImage, legoRef } from './lego'
 
 const norm = (s: string) =>
   s
@@ -11,7 +12,7 @@ const norm = (s: string) =>
     .trim()
 
 // Vrai si l'image s'affiche (lien mort, site qui refuse… → faux).
-function loads(url: string, timeoutMs = 8000) {
+export function loads(url: string, timeoutMs = 8000) {
   return new Promise<boolean>((resolve) => {
     const img = new Image()
     img.referrerPolicy = 'no-referrer'
@@ -72,7 +73,9 @@ export async function fillMissingCovers(
   for (const item of candidates) {
     if (signal.aborted) break
     try {
-      const cover = await bestCover(item.category, item.title, signal)
+      // LEGO avec numéro de set : la boîte officielle d'abord.
+      const ref = item.category === 'lego' ? legoRef(item.reference) : undefined
+      const cover = (ref && (await loads(legoImage(ref))) ? legoImage(ref) : undefined) ?? (await bestCover(item.category, item.title, signal))
       if (cover && cover !== item.cover && (await loads(cover))) {
         await db.items.update(item.id!, { cover })
         progress.found++

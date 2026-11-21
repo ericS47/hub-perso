@@ -8,7 +8,8 @@ export default function CoverImage({ item }: { item: Pick<CultureItem, 'title' |
   const icon = categoryOf(item.category)?.icon ?? '🎞️'
 
   return (
-    <div className="cover">
+    // LEGO : photos de sets souvent en paysage, montrées en entier plutôt que rognées.
+    <div className={item.category === 'lego' && item.cover?.startsWith('http') ? 'cover contain' : 'cover'}>
       {item.cover && broken !== item.cover ? (
         <img
           src={item.cover}

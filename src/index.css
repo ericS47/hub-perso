@@ -690,3 +690,7 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
   border-radius: 9px; background: var(--accent); color: var(--on-accent);
   font-size: 0.7rem; font-weight: 800; line-height: 18px; text-align: center;
 }
+
+.warn-text { color: #fca5a5; }
+.cover.contain { background: #fff; }
+.cover.contain img { object-fit: contain; padding: 6px; }
