@@ -1,15 +1,20 @@
 import Sheet from './Sheet'
 
 interface Props {
-  // Numéro du set (75192) ; à défaut, le titre sert de recherche.
+  // LEGO : numéro du set (75192) ; puzzles : code-barres. À défaut, le titre.
   reference?: string
   title: string
+  lego: boolean
   onClose: () => void
 }
 
 interface Site {
   name: string
   url: (q: string, ref: string) => string
+  // Site propre aux LEGO (masqué pour les autres produits).
+  lego?: boolean
+  // Annonces de particuliers : on y cherche par nom, jamais par code-barres.
+  byName?: boolean
 }
 
 const e = encodeURIComponent
@@ -28,63 +33,66 @@ const GROUPS: { title: string; hint: string; sites: Site[] }[] = [
   },
   {
     title: '🛒 Boutiques',
-    hint: 'LEGO.com donne le prix officiel',
+    hint: 'Les grandes enseignes (LEGO.com donne le prix officiel des sets)',
     sites: [
-      { name: 'LEGO.com', url: (_q, ref) => `https://www.lego.com/fr-fr/search?q=${e(ref)}` },
+      { name: 'LEGO.com', url: (_q, ref) => `https://www.lego.com/fr-fr/search?q=${e(ref)}`, lego: true },
       { name: 'Amazon', url: (q) => `https://www.amazon.fr/s?k=${e(q)}` },
       { name: 'Fnac', url: (q) => `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${e(q)}` },
       { name: 'Cdiscount', url: (q) => `https://www.cdiscount.com/search/10/${e(q.toLowerCase()).replace(/%20/g, '+')}.html` },
       { name: 'Carrefour', url: (q) => `https://www.carrefour.fr/s?q=${e(q)}` },
       { name: 'Auchan', url: (q) => `https://www.auchan.fr/recherche?text=${e(q)}` },
       { name: 'E.Leclerc', url: (q) => `https://www.e.leclerc/recherche?q=${e(q)}` },
-      { name: 'Smyths Toys', url: (_q, ref) => `https://www.smythstoys.com/fr/fr-fr/search/?text=${e(ref)}` },
+      { name: 'Smyths Toys', url: (q) => `https://www.smythstoys.com/fr/fr-fr/search/?text=${e(q)}` },
       { name: 'Rakuten', url: (q) => `https://fr.shopping.rakuten.com/search/${e(q)}` },
     ],
   },
   {
     title: '🔥 Bons plans',
     hint: 'Promos signalées par la communauté',
-    sites: [{ name: 'Dealabs', url: (q) => `https://www.dealabs.com/search?q=${e(q)}` }],
+    sites: [{ name: 'Dealabs', url: (q) => `https://www.dealabs.com/search?q=${e(q)}`, byName: true }],
   },
   {
     title: '♻️ Occasion',
-    hint: 'Souvent moins cher, et seul moyen pour les sets retirés',
+    hint: 'Souvent moins cher, et seul moyen pour les produits retirés',
     sites: [
-      { name: 'Leboncoin', url: (q) => `https://www.leboncoin.fr/recherche?text=${e(q)}` },
-      { name: 'Vinted', url: (q) => `https://www.vinted.fr/catalog?search_text=${e(q)}` },
-      { name: 'eBay', url: (q) => `https://www.ebay.fr/sch/i.html?_nkw=${e(q)}` },
+      { name: 'Leboncoin', url: (q) => `https://www.leboncoin.fr/recherche?text=${e(q)}`, byName: true },
+      { name: 'Vinted', url: (q) => `https://www.vinted.fr/catalog?search_text=${e(q)}`, byName: true },
+      { name: 'eBay', url: (q) => `https://www.ebay.fr/sch/i.html?_nkw=${e(q)}`, byName: true },
       {
         name: 'BrickLink',
         url: (q, ref) =>
           /^\d/.test(ref)
             ? `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${e(ref.includes('-') ? ref : `${ref}-1`)}`
             : `https://www.bricklink.com/v2/search.page?q=${e(q)}`,
+        lego: true,
       },
     ],
   },
   {
     title: '📈 Cote du set',
     hint: 'Valeur actuelle et évolution, utile pour les sets retirés',
-    sites: [{ name: 'BrickEconomy', url: (_q, ref) => `https://www.brickeconomy.com/search?query=${e(ref)}` }],
+    sites: [{ name: 'BrickEconomy', url: (_q, ref) => `https://www.brickeconomy.com/search?query=${e(ref)}`, lego: true }],
   },
 ]
 
-export default function PriceSheet({ reference, title, onClose }: Props) {
-  const ref = reference?.replace(/-1$/, '') || title
-  const query = reference ? `LEGO ${ref}` : title
+export default function PriceSheet({ reference, title, lego, onClose }: Props) {
+  const ref = (lego ? reference?.replace(/-1$/, '') : reference) || title
+  // Code-barres : reconnu tel quel par la plupart des boutiques et comparateurs.
+  const query = reference ? (lego ? `LEGO ${ref}` : ref) : title
+  const groups = GROUPS.map((g) => ({ ...g, sites: g.sites.filter((s) => lego || !s.lego) })).filter((g) => g.sites.length)
 
   return (
     <Sheet title="💶 Comparer les prix" onClose={onClose}>
       <p className="muted small-text sheet-sub">
         Recherche : <strong>{query}</strong> · chaque site s'ouvre dans un nouvel onglet
       </p>
-      {GROUPS.map((g) => (
+      {groups.map((g) => (
         <section key={g.title} className="price-group">
           <h3>{g.title}</h3>
           <p className="muted small-text">{g.hint}</p>
           <div className="price-links">
             {g.sites.map((s) => (
-              <a key={s.name} href={s.url(query, ref)} target="_blank" rel="noopener noreferrer" className="chip">
+              <a key={s.name} href={s.url(s.byName && !lego ? title : query, ref)} target="_blank" rel="noopener noreferrer" className="chip">
                 {s.name} ↗
               </a>
             ))}

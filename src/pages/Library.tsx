@@ -419,7 +419,7 @@ export default function Library() {
                   ★ Conseillé
                 </button>
               </div>
-              {centered.category === 'lego' && (
+              {(centered.category === 'lego' || centered.category === 'puzzles') && (
                 <button type="button" className="btn ghost price-btn" onClick={() => setPricing(centered)}>
                   💶 Comparer les prix
                 </button>
@@ -455,7 +455,12 @@ export default function Library() {
       )}
 
       {pricing && (
-        <PriceSheet reference={pricing.reference} title={pricing.title} onClose={() => setPricing(undefined)} />
+        <PriceSheet
+          reference={pricing.reference}
+          title={pricing.title}
+          lego={pricing.category === 'lego'}
+          onClose={() => setPricing(undefined)}
+        />
       )}
       {managing && cat && <ThemeManager category={cat.id} items={inTab} onClose={() => setManaging(false)} />}
 

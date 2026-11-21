@@ -5,6 +5,7 @@ import { CATEGORIES, OWNERSHIP, doneLabel, parseGenres } from '../culture/catego
 import type { Suggestion } from '../culture/suggest'
 import { ensureThemes } from '../culture/themes'
 import { legoImage, legoRef } from '../culture/lego'
+import { isBarcode, lookupBarcode } from '../culture/barcode'
 import { loads } from '../culture/fillCovers'
 import CoverPicker from './CoverPicker'
 import TitleAutocomplete from './TitleAutocomplete'
@@ -24,7 +25,7 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
   const [category, setCategory] = useState<CultureCategory>(item?.category ?? defaultCategory)
   const [cover, setCover] = useState(item?.cover)
   const [reference, setReference] = useState(item?.reference ?? '')
-  const [refStatus, setRefStatus] = useState<'idle' | 'checking' | 'found' | 'unknown'>('idle')
+  const [refStatus, setRefStatus] = useState<'idle' | 'checking' | 'found' | 'noimage' | 'unknown'>('idle')
   const [ownership, setOwnership] = useState<Ownership>(item?.ownership ?? 'owned')
   const [seen, setSeen] = useState(item?.seen ?? false)
   const [priority, setPriority] = useState(item?.priority ?? false)
@@ -61,23 +62,36 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
     if (s.genres.length) setGenres((gs) => parseGenres([...gs, ...s.genres].join(',')))
   }
 
-  // LEGO : dès que le numéro de set est reconnu, la boîte devient la couverture
-  // (sauf photo importée), et un titre provisoire est proposé s'il est vide.
+  // Référence (LEGO : numéro de set ; puzzles : code-barres). Dès qu'elle est
+  // reconnue, l'image du produit devient la couverture (sauf photo importée)
+  // et un titre est proposé s'il est vide.
   useEffect(() => {
     const ref = category === 'lego' ? legoRef(reference) : undefined
-    if (!ref) return
+    const ean = category === 'puzzles' && isBarcode(reference) ? reference.trim() : undefined
+    if (!ref && !ean) return
     let alive = true
+    const ctrl = new AbortController()
     const timer = window.setTimeout(async () => {
       setRefStatus('checking')
-      const ok = await loads(legoImage(ref))
+      if (ref) {
+        const ok = await loads(legoImage(ref))
+        if (!alive) return
+        setRefStatus(ok ? 'found' : 'unknown')
+        if (!ok) return
+        setCover((c) => (c?.startsWith('data:') ? c : legoImage(ref)))
+        setTitle((t) => t || `LEGO ${ref.replace(/-1$/, '')}`)
+        return
+      }
+      const product = await lookupBarcode(ean!, ctrl.signal).catch(() => undefined)
       if (!alive) return
-      setRefStatus(ok ? 'found' : 'unknown')
-      if (!ok) return
-      setCover((c) => (c?.startsWith('data:') ? c : legoImage(ref)))
-      setTitle((t) => t || `LEGO ${ref.replace(/-1$/, '')}`)
+      if (!product) return setRefStatus('unknown')
+      setRefStatus(product.image ? 'found' : 'noimage')
+      if (product.image) setCover((c) => (c?.startsWith('data:') ? c : product.image))
+      if (product.name) setTitle((t) => t || [product.brand, product.name].filter(Boolean).join(' · '))
     }, 400)
     return () => {
       alive = false
+      ctrl.abort()
       window.clearTimeout(timer)
     }
   }, [category, reference])
@@ -94,7 +108,7 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
       title: clean,
       category,
       cover,
-      reference: category === 'lego' ? reference.trim() || undefined : item?.reference,
+      reference: category === 'lego' || category === 'puzzles' ? reference.trim() || undefined : item?.reference,
       ownership,
       seen,
       priority,
@@ -132,28 +146,36 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
           </select>
         </label>
 
-        {category === 'lego' && (
+        {(category === 'lego' || category === 'puzzles') && (
           <label className="field-label">
-            Numéro du set (sur la boîte, ex. 75192)
+            {category === 'lego' ? 'Numéro du set (sur la boîte, ex. 75192)' : 'Code-barres (13 chiffres) ou référence'}
             <input
               className="field"
               value={reference}
               onChange={(e) => {
-                setReference(e.target.value.replace(/[^\d-]/g, ''))
+                setReference(
+                  category === 'lego' ? e.target.value.replace(/[^\d-]/g, '') : e.target.value.replace(/[^\w-]/g, ''),
+                )
                 setRefStatus('idle')
               }}
               inputMode="numeric"
-              placeholder="75192"
+              placeholder={category === 'lego' ? '75192' : '4005556173839'}
               autoFocus={!item}
             />
             <span className={refStatus === 'unknown' ? 'muted small-text warn-text' : 'muted small-text'}>
               {refStatus === 'checking'
-                ? 'Recherche de la boîte…'
+                ? "Recherche de l'image…"
                 : refStatus === 'found'
-                  ? '✓ Boîte trouvée et ajoutée comme image'
-                  : refStatus === 'unknown'
-                    ? 'Numéro inconnu : vérifie-le sur la boîte, ou ajoute une photo'
-                    : "L'image de la boîte est ajoutée automatiquement"}
+                  ? '✓ Produit trouvé, image ajoutée'
+                  : refStatus === 'noimage'
+                    ? 'Produit trouvé, mais sans image : ajoute une photo'
+                    : refStatus === 'unknown'
+                      ? category === 'lego'
+                        ? 'Numéro inconnu : vérifie-le sur la boîte, ou ajoute une photo'
+                        : 'Code-barres inconnu de la base : ajoute une photo de la boîte'
+                      : category === 'lego'
+                        ? "L'image de la boîte est ajoutée automatiquement"
+                        : 'Avec le code-barres, image et nom sont cherchés automatiquement ; il sert aussi à comparer les prix'}
             </span>
           </label>
         )}
@@ -163,7 +185,7 @@ export default function ItemForm({ item, defaultCategory, lists, onClose, onSave
           <TitleAutocomplete
             value={title}
             category={category}
-            autoFocus={!item && category !== 'lego'}
+            autoFocus={!item && category !== 'lego' && category !== 'puzzles'}
             onChange={setTitle}
             onPick={pickSuggestion}
           />

@@ -2,6 +2,7 @@ import { db, type CultureCategory, type CultureItem } from '../db'
 import { suggest } from './suggest'
 import { searchCovers } from './coverSearch'
 import { legoImage, legoRef } from './lego'
+import { isBarcode, lookupBarcode } from './barcode'
 
 const norm = (s: string) =>
   s
@@ -75,7 +76,15 @@ export async function fillMissingCovers(
     try {
       // LEGO avec numéro de set : la boîte officielle d'abord.
       const ref = item.category === 'lego' ? legoRef(item.reference) : undefined
-      const cover = (ref && (await loads(legoImage(ref))) ? legoImage(ref) : undefined) ?? (await bestCover(item.category, item.title, signal))
+      // Puzzles avec code-barres : l'image de la base de produits.
+      const ean = item.category === 'puzzles' && isBarcode(item.reference) ? item.reference! : undefined
+      const byRef =
+        ref && (await loads(legoImage(ref)))
+          ? legoImage(ref)
+          : ean
+            ? (await lookupBarcode(ean, signal).catch(() => undefined))?.image
+            : undefined
+      const cover = byRef ?? (await bestCover(item.category, item.title, signal))
       if (cover && cover !== item.cover && (await loads(cover))) {
         await db.items.update(item.id!, { cover })
         progress.found++
