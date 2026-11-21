@@ -12,15 +12,16 @@ const norm = (s: string) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
 
-// Vrai si l'image s'affiche (lien mort, site qui refuse… → faux).
-export function loads(url: string, timeoutMs = 8000) {
+// Vrai si l'image s'affiche (lien mort, site qui refuse… → faux), avec une
+// largeur minimale pour écarter les images factices d'un pixel.
+export function loads(url: string, timeoutMs = 8000, minWidth = 2) {
   return new Promise<boolean>((resolve) => {
     const img = new Image()
     img.referrerPolicy = 'no-referrer'
     const timer = window.setTimeout(() => resolve(false), timeoutMs)
     img.onload = () => {
       window.clearTimeout(timer)
-      resolve(img.naturalWidth > 1)
+      resolve(img.naturalWidth >= minWidth)
     }
     img.onerror = () => {
       window.clearTimeout(timer)
