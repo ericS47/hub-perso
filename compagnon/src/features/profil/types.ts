@@ -190,10 +190,23 @@ export interface Meal {
 
 export type Often = 'oui' | 'parfois' | 'non'
 
+// Où se prend un repas (plusieurs réponses possibles : ça peut changer selon les jours).
+export type MealPlace = 'maison' | 'emporte' | 'restaurant' | 'cantine' | 'achat'
+export type RestaurantWhy = 'plaisir' | 'travail'
+
+export interface MealHabit {
+  places?: MealPlace[]
+  restaurantPerWeek?: number // fois par semaine au restaurant pour ce repas
+  restaurantWhy?: RestaurantWhy[]
+}
+
 export interface AlimentationData {
+  lunch?: MealHabit
+  dinner?: MealHabit
+  // Ancien format (restaurant sans distinguer midi et soir), conservé tel quel.
   restaurant?: 'jamais' | 'parfois' | 'souvent'
   restaurantPerWeek?: number
-  restaurantWhy?: ('plaisir' | 'travail')[]
+  restaurantWhy?: RestaurantWhy[]
   allergies?: boolean
   allergiesDetail?: string
   aversions?: string

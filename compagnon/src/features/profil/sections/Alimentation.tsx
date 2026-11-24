@@ -2,7 +2,21 @@ import { Choice, Multi, NumberField, SubBlock, TextField, YesNo } from '../field
 import { OFTEN_OPTIONS } from '../utils'
 import Plateau from '../Plateau'
 import { useSectionEditor } from '../store'
+import type { MealHabit, MealPlace, RestaurantWhy } from '../types'
 import Wizard, { type Step } from '../Wizard'
+
+const PLACES: { value: MealPlace; label: string }[] = [
+  { value: 'maison', label: '🏠 Je mange chez moi' },
+  { value: 'emporte', label: '🥡 J’emmène mon repas' },
+  { value: 'restaurant', label: '🍽️ Au restaurant' },
+  { value: 'cantine', label: '🏢 À la cantine / au self' },
+  { value: 'achat', label: '🥪 J’achète sur place (boulangerie, snack…)' },
+]
+
+const WHY: { value: RestaurantWhy; label: string }[] = [
+  { value: 'plaisir', label: 'Le plaisir' },
+  { value: 'travail', label: 'Le travail' },
+]
 
 const EMOTIONS = ['Stress', 'Ennui', 'Tristesse', 'Colère', 'Fatigue', 'Solitude', 'Anxiété', 'Joie / fête', 'Frustration']
 const CONTEXTS = ['Seul·e à la maison', 'En rentrant du travail', 'Le soir / la nuit', 'Devant un écran', 'Après une dispute', 'En voyant de la nourriture', 'Entre amis', 'Au travail']
@@ -13,39 +27,37 @@ export default function Alimentation() {
   const { data: d, update } = ed
   const opts = (l: string[]) => l.map((v) => ({ value: v, label: v }))
 
-  const steps: Step[] = [
-    {
-      key: 'restaurant',
-      title: 'Au restaurant',
+  // Midi et soir : même questions, réponses séparées.
+  const mealStep = (key: string, title: string, when: string, field: 'lunch' | 'dinner'): Step => {
+    const h: MealHabit = d[field] ?? {}
+    const set = (patch: Partial<MealHabit>) => update((p) => ({ ...p, [field]: { ...p[field], ...patch } }))
+    return {
+      key,
+      title,
       content: (
         <>
-          <Choice
-            label="Manges-tu souvent au restaurant (cantine, snack, livraison compris) ?"
-            options={[
-              { value: 'jamais', label: 'Presque jamais' },
-              { value: 'parfois', label: 'Parfois' },
-              { value: 'souvent', label: 'Souvent' },
-            ]}
-            value={d.restaurant}
-            onChange={(restaurant) => update({ restaurant })}
-          />
-          {d.restaurant && d.restaurant !== 'jamais' && (
+          <Multi label={`Où manges-tu ${when}, en général ?`} options={PLACES} value={h.places} onChange={(places) => set({ places })} />
+          <p className="profil-hint">Plusieurs réponses possibles si ça change selon les jours.</p>
+          {h.places?.includes('restaurant') && (
             <SubBlock>
-              <NumberField label="Combien de fois par semaine, environ ?" unit="fois / semaine" max={21} value={d.restaurantPerWeek} onChange={(restaurantPerWeek) => update({ restaurantPerWeek })} />
-              <Multi
-                label="Plutôt pour…"
-                options={[
-                  { value: 'plaisir', label: 'Le plaisir' },
-                  { value: 'travail', label: 'Le travail' },
-                ]}
-                value={d.restaurantWhy}
-                onChange={(restaurantWhy) => update({ restaurantWhy })}
+              <NumberField
+                label={`Au restaurant ${when} : combien de fois par semaine, environ ?`}
+                unit="fois / semaine"
+                max={7}
+                value={h.restaurantPerWeek}
+                onChange={(restaurantPerWeek) => set({ restaurantPerWeek })}
               />
+              <Multi label="Plutôt pour…" options={WHY} value={h.restaurantWhy} onChange={(restaurantWhy) => set({ restaurantWhy })} />
             </SubBlock>
           )}
         </>
       ),
-    },
+    }
+  }
+
+  const steps: Step[] = [
+    mealStep('midi', 'Le repas du midi', 'le midi', 'lunch'),
+    mealStep('soir', 'Le repas du soir', 'le soir', 'dinner'),
     {
       key: 'allergies',
       title: 'Allergies et aversions',
