@@ -12,6 +12,7 @@ import Identite from './sections/Identite'
 import Moral from './sections/Moral'
 import Onaps from './sections/Onaps'
 import Sante from './sections/Sante'
+import Sommeil from './sections/Sommeil'
 import Sport from './sections/Sport'
 import Travail from './sections/Travail'
 import { isSectionId } from './store'
@@ -26,6 +27,7 @@ const SECTIONS: Record<ProfileSectionId, ComponentType> = {
   douleurs: Douleurs,
   alimentation: Alimentation,
   hydratation: Hydratation,
+  sommeil: Sommeil,
   moral: Moral,
   attentes: Attentes,
 }

@@ -53,6 +53,7 @@ export type ProfileSectionId =
   | 'douleurs'
   | 'alimentation'
   | 'hydratation'
+  | 'sommeil'
   | 'moral'
   | 'attentes'
 

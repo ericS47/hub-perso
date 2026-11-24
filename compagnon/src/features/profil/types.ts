@@ -226,17 +226,40 @@ export interface AlimentationData {
 export type WaterAmount = 'moins05' | '05a1' | '1a15' | '15a2' | 'plus2'
 export type AlcoholFreq = 'jamais' | 'occasion' | 'semaine1-2' | 'semaine3-5' | 'quotidien'
 
+export type Sugar = 'non' | 'peu' | 'beaucoup' | 'edulcorant'
+export type DrinkFreq = 'rarement' | 'semaine' | 'quotidien'
+export type WaterWay = 'nature' | 'gazeuse' | 'sirop' | 'aromatisee' | 'autre'
+
+// Boisson ajoutée par le patient (autre boisson chaude ou froide).
+export interface DrinkItem {
+  id: string
+  name: string
+  cups?: number // boissons chaudes : tasses par jour
+  sugar?: Sugar
+  freq?: DrinkFreq // boissons froides
+  amount?: string
+}
+
 export interface HydratationData {
   coffee?: boolean
   coffeeCups?: number
+  coffeeSugar?: Sugar
   tea?: boolean
   teaCups?: number
-  otherDrinks?: string
+  teaSugar?: Sugar
+  chocolate?: boolean
+  chocolateCups?: number
+  chocolateSugar?: Sugar
+  otherHot?: DrinkItem[]
+  otherDrinks?: string // précisions libres (ancienne question « D'autres boissons ? »)
   water?: WaterAmount
+  waterWays?: WaterWay[]
+  waterNote?: string
   sodas?: boolean
   sodaTypes?: ('normal' | 'zero')[]
-  sodaFreq?: 'rarement' | 'semaine' | 'quotidien'
+  sodaFreq?: DrinkFreq
   sodaAmount?: string
+  otherCold?: DrinkItem[]
   alcohol?: AlcoholFreq
   alcoholContexts?: string[]
   alcoholQty?: number // verres par occasion
@@ -245,7 +268,20 @@ export interface HydratationData {
 }
 
 // ───── Mon moral ─────
+export type Psy = 'psychiatre' | 'psychologue' | 'autre'
+
+// Un suivi (thérapie) passé ou en cours ; il peut y en avoir plusieurs.
+export interface Therapy {
+  id: string
+  pro?: Psy
+  reason?: string
+  duration?: string
+  ongoing?: boolean
+}
+
 export interface MoralData {
+  hadTherapy?: boolean
+  therapies?: Therapy[]
   moral?: number
   moralBefore?: number
   epanoui?: number
@@ -253,6 +289,26 @@ export interface MoralData {
   stress?: number
   bodyImage?: number
   note?: string
+}
+
+// ───── Mon sommeil ─────
+export type SleepRegularity = 'regulier' | 'weekend' | 'aleatoire'
+export type FallAsleep = 'moins15' | '15a30' | '30a60' | 'plus60' | 'variable'
+export type SleepHistory = 'aucune' | 'toujours' | 'recent' | 'periode'
+
+export interface SommeilData {
+  bedtime?: string // 'HH:MM'
+  wakeTime?: string
+  regularity?: SleepRegularity
+  fallAsleep?: FallAsleep
+  wakesAtNight?: boolean
+  wakeCount?: number
+  backToSleep?: Often
+  rituals?: string[]
+  ritualNote?: string
+  quality?: number // 1 à 10
+  history?: SleepHistory
+  historyDetail?: string
 }
 
 // ───── Mes attentes ─────
@@ -272,6 +328,7 @@ export interface SectionDataMap {
   douleurs: DouleursData
   alimentation: AlimentationData
   hydratation: HydratationData
+  sommeil: SommeilData
   moral: MoralData
   attentes: AttentesData
 }

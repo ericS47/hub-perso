@@ -5,16 +5,17 @@ interface Props {
   // Libellés des extrémités, ex. « Pas du tout » / « Énormément ».
   minLabel?: string
   maxLabel?: string
+  min?: number
   max?: number
 }
 
-// Échelle de 0 à 10 (par défaut) : une rangée de pastilles faciles à toucher.
-export default function Scale({ label, value, onChange, minLabel, maxLabel, max = 10 }: Props) {
+// Échelle de 0 à 10 (par défaut, bornes réglables) : une rangée de pastilles faciles à toucher.
+export default function Scale({ label, value, onChange, minLabel, maxLabel, min = 0, max = 10 }: Props) {
   return (
     <fieldset className="scale">
       <legend>{label}</legend>
       <div className="scale-row" role="radiogroup" aria-label={label}>
-        {Array.from({ length: max + 1 }, (_, n) => (
+        {Array.from({ length: max - min + 1 }, (_, k) => k + min).map((n) => (
           <button
             key={n}
             type="button"

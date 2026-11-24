@@ -24,7 +24,8 @@ export const PROFILE_SECTIONS: SectionMeta[] = [
   { id: 'sante', title: 'Ma santé', icon: '🩺', group: 'Ma santé', hint: 'Pathologies, traitements, famille' },
   { id: 'douleurs', title: 'Mes douleurs', icon: '🩹', group: 'Ma santé', hint: 'Où, et à quel moment' },
   { id: 'alimentation', title: 'Mon alimentation', icon: '🍽️', group: 'Mon alimentation', hint: 'Mes repas, mon plateau' },
-  { id: 'hydratation', title: 'Mon hydratation', icon: '💧', group: 'Mon hydratation', hint: 'Eau, café, thé, sodas, alcool' },
+  { id: 'hydratation', title: 'Mon hydratation', icon: '💧', group: 'Mon hydratation', hint: 'Eau, boissons chaudes et froides, alcool' },
+  { id: 'sommeil', title: 'Mon sommeil', icon: '😴', group: 'Mon sommeil', hint: 'Horaires, nuits, rituels du coucher' },
   { id: 'moral', title: 'Mon moral', icon: '🌤️', group: 'Mon moral', hint: 'Comment je me sens' },
   { id: 'attentes', title: 'Mes attentes', icon: '🎯', group: 'Mes attentes', hint: 'Pourquoi je viens ici' },
 ]
