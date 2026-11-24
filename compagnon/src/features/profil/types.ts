@@ -29,6 +29,16 @@ export interface IdentiteData {
   birthPlace?: string
   heightCm?: number
   weightKg?: number
+  weightSatisfied?: 'oui' | 'moyen' | 'non'
+  weightHistory?: WeightEntry[]
+}
+
+// Un poids à une date donnée, avec la raison d'un changement si on veut.
+export interface WeightEntry {
+  id: string
+  date?: string // 'YYYY-MM-DD' (ou seulement une année/mois saisis comme date)
+  kg?: number
+  note?: string
 }
 
 export interface ClubSport {

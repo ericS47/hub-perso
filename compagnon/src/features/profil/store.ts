@@ -16,7 +16,7 @@ export interface SectionMeta {
 }
 
 export const PROFILE_SECTIONS: SectionMeta[] = [
-  { id: 'identite', title: 'Qui je suis', icon: '🪪', group: 'Qui je suis', hint: 'Naissance, taille, poids' },
+  { id: 'identite', title: 'Qui je suis', icon: '🪪', group: 'Qui je suis', hint: 'Naissance, taille, poids et son évolution' },
   { id: 'sport', title: 'Mon histoire du sport', icon: '🏅', group: 'Qui je suis', hint: 'École, club, aujourd’hui' },
   { id: 'onaps', title: 'Suis-je actif au quotidien ?', icon: '🚶', group: 'Qui je suis', hint: 'Travail, déplacements, loisirs, temps assis' },
   { id: 'foyer', title: 'Mon foyer', icon: '🏡', group: 'Qui je suis', hint: 'Couple, enfants, parents' },
