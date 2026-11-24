@@ -96,10 +96,20 @@ export interface FoyerData {
 
 export type WorkStatus = 'retraite' | 'recherche' | 'arret' | 'etudes' | 'foyer' | 'autre'
 
+// Un emploi : on peut en cumuler plusieurs, chacun avec sa structure et ses horaires.
+export interface Emploi {
+  id: string
+  employer: string // nom de la structure (entreprise, association, particulier…)
+  job?: string
+  schedule?: Schedule
+}
+
 export interface TravailData {
   works?: boolean
-  job?: string
+  jobs?: Emploi[]
   status?: WorkStatus
+  // Ancien format (un seul emploi) : relu par travailJobs() puis remplacé par jobs.
+  job?: string
   schedule?: Schedule
 }
 

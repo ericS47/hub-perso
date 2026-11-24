@@ -1,6 +1,6 @@
 import type { Constraint } from '../../db'
 import { toMinutes } from '../../lib/dates'
-import type { FoyerData, Schedule, TimeSlot, TravailData } from './types'
+import type { Emploi, FoyerData, Schedule, TimeSlot, TravailData } from './types'
 
 type NewConstraint = Omit<Constraint, 'id'>
 type Source = Constraint['source']
@@ -42,9 +42,23 @@ export function scheduleToConstraints(
   ]
 }
 
+// Emplois de la rubrique, en reprenant l'ancien format à un seul emploi s'il est encore là.
+export function travailJobs(d: TravailData): Emploi[] {
+  if (d.jobs) return d.jobs
+  if (d.job || d.schedule) return [{ id: 'emploi-1', employer: '', job: d.job, schedule: d.schedule }]
+  return []
+}
+
+export function jobLabel(e: Emploi, n: number): string {
+  return e.employer.trim() || e.job?.trim() || `Emploi n° ${n + 1}`
+}
+
 export function travailConstraints(d: TravailData): NewConstraint[] {
   if (d.works !== true) return []
-  return scheduleToConstraints(d.schedule, 'travail', 'Travail')
+  const jobs = travailJobs(d)
+  return jobs.flatMap((e, n) =>
+    scheduleToConstraints(e.schedule, 'travail', jobs.length > 1 || e.employer.trim() ? `Travail – ${jobLabel(e, n)}` : 'Travail'),
+  )
 }
 
 export function foyerConstraints(d: FoyerData): NewConstraint[] {
