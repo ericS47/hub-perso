@@ -6,6 +6,8 @@ interface Props {
   title: string
   lego: boolean
   onClose: () => void
+  // Page Promo : propose d'ajouter le produit aux prix suivis.
+  onFollow?: () => void
 }
 
 interface Site {
@@ -75,7 +77,7 @@ const GROUPS: { title: string; hint: string; sites: Site[] }[] = [
   },
 ]
 
-export default function PriceSheet({ reference, title, lego, onClose }: Props) {
+export default function PriceSheet({ reference, title, lego, onClose, onFollow }: Props) {
   const ref = (lego ? reference?.replace(/-1$/, '') : reference) || title
   // Code-barres : reconnu tel quel par la plupart des boutiques et comparateurs.
   const query = reference ? (lego ? `LEGO ${ref}` : ref) : title
@@ -99,6 +101,13 @@ export default function PriceSheet({ reference, title, lego, onClose }: Props) {
           </div>
         </section>
       ))}
+      {onFollow && (
+        <div className="form-actions">
+          <button type="button" className="btn" onClick={onFollow}>
+            ⭐ Suivre le prix de ce produit
+          </button>
+        </div>
+      )}
     </Sheet>
   )
 }

@@ -119,6 +119,25 @@ export interface Match extends ScoreRules {
   updatedAt: number
 }
 
+// Promo : produit dont on suit le prix (6 au plus).
+export interface PriceEntry {
+  price: number
+  shop?: string
+  date: number
+}
+
+export interface Watch {
+  id?: number
+  name: string
+  // Code-barres ou référence, pour comparer précisément.
+  reference?: string
+  image?: string
+  // Prix en dessous duquel c'est une bonne affaire.
+  target?: number
+  prices: PriceEntry[]
+  createdAt: number
+}
+
 // labelId = 0 : note sans étiquette.
 export interface Note {
   id?: number
@@ -141,6 +160,7 @@ class HubDB extends Dexie {
   scoreGames!: Table<ScoreGame, number>
   players!: Table<Player, number>
   matches!: Table<Match, number>
+  watches!: Table<Watch, number>
 
   constructor() {
     super('hub')
@@ -263,6 +283,21 @@ class HubDB extends Dexie {
         )
         await tx.table('themes').bulkAdd(add)
       })
+    // Version 10 : produits suivis de la page Promo.
+    this.version(10).stores({
+        tasks: '++id, done, createdAt',
+        items: '++id, category, createdAt, *listIds, *genres',
+        lists: '++id, createdAt',
+        portfolios: '++id, createdAt',
+        positions: '++id, portfolioId',
+        labels: '++id, parentId, createdAt',
+        notes: '++id, labelId, updatedAt',
+        themes: '++id, category, createdAt',
+        scoreGames: '++id, slug, category, name',
+        players: '++id, name',
+        matches: '++id, gameId, status, updatedAt',
+      watches: '++id, createdAt',
+    })
     // Base toute neuve : les upgrades ne tournent pas, on crée les listes ici.
     this.on('populate', async (tx) => {
       await tx.table('themes').bulkAdd(seedThemes([]))

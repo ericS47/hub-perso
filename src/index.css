@@ -716,3 +716,40 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 
 .bgg-credit { text-align: center; margin: 16px 0 0; }
 .bgg-credit a { color: var(--accent); }
+
+/* Promo */
+.no-margin { margin: 0; }
+.promo-search { margin: 10px 0 6px; }
+.promo-search .field { flex: 1; min-width: 0; }
+.watch-list, .deal-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.watch { border-bottom: 1px solid var(--border); padding: 8px 0; display: grid; gap: 6px; }
+.watch.deal { border-left: 3px solid #4ade80; padding-left: 8px; }
+.watch-main { display: flex; align-items: center; gap: 10px; background: none; border: none; color: var(--text); text-align: left; padding: 0; cursor: pointer; font: inherit; width: 100%; }
+.watch-img, .deal-img {
+  flex: none; width: 52px; height: 52px; border-radius: 10px; overflow: hidden; background: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.watch-img img, .deal-img img { width: 100%; height: 100%; object-fit: contain; }
+.watch-main .match-text { flex: 1; }
+.deal-badge { color: #4ade80; font-size: 0.8rem; font-weight: 700; }
+.watch-compare { justify-self: start; padding: 6px 12px; font-size: 0.85rem; }
+.sparkline { flex: none; width: 90px; height: 36px; }
+.spark-line { stroke: var(--accent); }
+.spark-dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.spark-target { stroke: #4ade80; stroke-width: 1; stroke-dasharray: 3 3; }
+.watch-thumb { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; flex: none; }
+.watch-add-price { display: grid; gap: 8px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.watch-add-price h3, .watch-history h3 { margin: 0; font-size: 0.95rem; color: var(--gold-light); }
+.watch-history { margin-top: 16px; }
+.watch-history ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.watch-history li { display: grid; grid-template-columns: 64px 1fr auto 28px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.best-price { color: #4ade80; }
+.deal-tabs { margin: 10px 0 4px; }
+.deal { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); color: var(--text); text-decoration: none; }
+.deal .match-text { flex: 1; }
+.deal-title { white-space: normal !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.88rem; }
+.deal-temp { flex: none; font-weight: 800; font-size: 0.85rem; color: var(--muted); }
+.deal-temp.hot { color: #fb923c; }
+.catalog-links { margin-top: 10px; }
+.catalog-links .chip { text-decoration: none; color: var(--text); }
+.chip.active-soft { border-color: var(--accent); color: var(--gold-light); }
