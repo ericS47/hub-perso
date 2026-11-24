@@ -2,7 +2,7 @@ import { toMinutes } from '../../../lib/dates'
 import Scale from '../../../ui/Scale'
 import { Choice, Multi, NumberField, SubBlock, TextField, TimeField, YesNo } from '../fields'
 import { useSectionEditor } from '../store'
-import type { FallAsleep, SleepHistory, SleepRegularity } from '../types'
+import type { FallAsleep, NapLength, SleepHistory, SleepRegularity } from '../types'
 import { formatMinutes, OFTEN_OPTIONS } from '../utils'
 import Wizard, { type Step } from '../Wizard'
 
@@ -18,6 +18,15 @@ const FALL_ASLEEP: { value: FallAsleep; label: string }[] = [
   { value: '30a60', label: '30 min à 1 h' },
   { value: 'plus60', label: 'Plus d’1 h' },
   { value: 'variable', label: 'Ça dépend des soirs' },
+]
+
+const NAP_MOMENTS = ['En fin de matinée', 'Après le déjeuner', 'En fin d’après-midi', 'En début de soirée', 'Ça varie']
+
+const NAP_LENGTH: { value: NapLength; label: string }[] = [
+  { value: 'moins20', label: 'Moins de 20 min' },
+  { value: '20a45', label: '20 à 45 min' },
+  { value: '45a90', label: '45 min à 1 h 30' },
+  { value: 'plus90', label: 'Plus d’1 h 30' },
 ]
 
 const RITUALS = [
@@ -78,6 +87,22 @@ export default function Sommeil() {
             <SubBlock>
               <NumberField label="Combien de fois par nuit, environ ?" unit="fois" max={20} value={d.wakeCount} onChange={(wakeCount) => update({ wakeCount })} />
               <Choice label="Arrives-tu à te rendormir facilement ?" options={OFTEN_OPTIONS} value={d.backToSleep} onChange={(backToSleep) => update({ backToSleep })} />
+            </SubBlock>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'siestes',
+      title: 'Les siestes',
+      content: (
+        <>
+          <YesNo label="Fais-tu des siestes dans la journée ?" value={d.naps} onChange={(naps) => update({ naps })} />
+          {d.naps && (
+            <SubBlock>
+              <Multi label="Plutôt quand ?" options={NAP_MOMENTS.map((m) => ({ value: m, label: m }))} value={d.napMoments} onChange={(napMoments) => update({ napMoments })} />
+              <NumberField label="Combien de siestes par semaine, environ ?" unit="fois / semaine" max={21} value={d.napsPerWeek} onChange={(napsPerWeek) => update({ napsPerWeek })} />
+              <Choice label="Combien de temps dure une sieste ?" options={NAP_LENGTH} value={d.napLength} onChange={(napLength) => update({ napLength })} />
             </SubBlock>
           )}
         </>

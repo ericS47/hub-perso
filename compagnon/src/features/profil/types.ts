@@ -294,6 +294,7 @@ export interface MoralData {
 // ───── Mon sommeil ─────
 export type SleepRegularity = 'regulier' | 'weekend' | 'aleatoire'
 export type FallAsleep = 'moins15' | '15a30' | '30a60' | 'plus60' | 'variable'
+export type NapLength = 'moins20' | '20a45' | '45a90' | 'plus90'
 export type SleepHistory = 'aucune' | 'toujours' | 'recent' | 'periode'
 
 export interface SommeilData {
@@ -304,6 +305,10 @@ export interface SommeilData {
   wakesAtNight?: boolean
   wakeCount?: number
   backToSleep?: Often
+  naps?: boolean
+  napMoments?: string[]
+  napsPerWeek?: number
+  napLength?: NapLength
   rituals?: string[]
   ritualNote?: string
   quality?: number // 1 à 10
