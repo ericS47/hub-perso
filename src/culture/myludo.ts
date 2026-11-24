@@ -15,6 +15,10 @@ interface MyludoGame {
   Date?: string
   // Présent seulement dans l'export Wishlist (niveau d'envie).
   Envie?: number
+  // Ajouté par la recherche BoardGameGeek : image de la boîte (lien ou
+  // image réduite intégrée au fichier) et son adresse d'origine.
+  Image?: string
+  ImageSource?: string
 }
 
 const norm = (s: string) =>
@@ -77,6 +81,8 @@ export async function importMyludo(file: File): Promise<MyludoResult> {
     .map((g, i) => ({
       title: g.Titre!.trim(),
       creator: g['Auteur(s)']?.length ? g['Auteur(s)'].join(', ') : undefined,
+      cover: typeof g.Image === 'string' && /^(https:\/\/|data:image\/)/.test(g.Image) ? g.Image : undefined,
+      coverCredit: /geekdo-images\.com/.test(g.ImageSource ?? g.Image ?? '') ? 'BGG' : undefined,
       themes: themesOf(g),
       createdAt: g.Date && !Number.isNaN(Date.parse(g.Date.replace(' ', 'T'))) ? Date.parse(g.Date.replace(' ', 'T')) : Date.now() - i,
     }))
@@ -100,8 +106,15 @@ export async function importMyludo(file: File): Promise<MyludoResult> {
     const known = existing.get(key)
     if (known) {
       const genres = [...new Set([...known.genres, ...e.themes])]
-      if (genres.length > known.genres.length || (!known.creator && e.creator)) {
-        toUpdate.push({ ...known, genres, creator: known.creator ?? e.creator })
+      // Image : ajoutée seulement s'il n'y en a pas déjà une (photo perso gardée).
+      if (genres.length > known.genres.length || (!known.creator && e.creator) || (!known.cover && e.cover)) {
+        toUpdate.push({
+          ...known,
+          genres,
+          creator: known.creator ?? e.creator,
+          cover: known.cover ?? e.cover,
+          coverCredit: known.cover ? known.coverCredit : e.coverCredit,
+        })
       } else result.skipped++
       continue
     }
@@ -109,6 +122,8 @@ export async function importMyludo(file: File): Promise<MyludoResult> {
       title: e.title,
       category: 'jeux-societe',
       creator: e.creator,
+      cover: e.cover,
+      coverCredit: e.coverCredit,
       seen: false,
       priority: false,
       ownership: wishlist ? 'wish' : 'owned',

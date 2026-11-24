@@ -35,6 +35,8 @@ export interface CultureItem {
   recommendedBy?: string
   // Auteur, réalisateur… (rempli par l'import Babelio).
   creator?: string
+  // Origine de l'image quand une mention est due (« BGG » : BoardGameGeek).
+  coverCredit?: string
   // Référence du produit (numéro de set pour les LEGO).
   reference?: string
   ownership: Ownership

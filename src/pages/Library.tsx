@@ -454,6 +454,16 @@ export default function Library() {
         </div>
       )}
 
+      {/* Mention exigée par les conditions d'utilisation de BoardGameGeek. */}
+      {inTab.some((i) => i.coverCredit === 'BGG' || i.cover?.includes('geekdo-images.com')) && (
+        <p className="muted small-text bgg-credit">
+          Images de boîtes :{' '}
+          <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer">
+            Powered by BGG
+          </a>
+        </p>
+      )}
+
       {pricing && (
         <PriceSheet
           reference={pricing.reference}
