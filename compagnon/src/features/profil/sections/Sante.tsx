@@ -18,7 +18,18 @@ const COMMON = [
   'Anxiété / dépression',
 ]
 
-const FAMILY = ['Diabète', 'Hypertension', 'Maladie cardiaque', 'AVC', 'Cholestérol', 'Cancer', 'Surpoids', 'Autre']
+const UNKNOWN = 'Je ne sais pas'
+const FAMILY = ['Diabète', 'Hypertension', 'Maladie cardiaque', 'AVC', 'Cholestérol', 'Cancer', 'Surpoids', 'Autre', UNKNOWN]
+const FAMILY_OPTIONS = FAMILY.map((n) => ({ value: n, label: n }))
+
+// « Je ne sais pas » exclut les autres réponses : le choisir efface le reste, et inversement.
+function familyChange(prev: string[] | undefined, next: string[] | undefined): string[] | undefined {
+  if (!next) return next
+  const added = next.find((n) => !(prev ?? []).includes(n))
+  if (added === UNKNOWN) return [UNKNOWN]
+  if (added) return next.filter((n) => n !== UNKNOWN)
+  return next
+}
 
 export default function Sante() {
   const ed = useSectionEditor('sante')
@@ -104,11 +115,11 @@ export default function Sante() {
     {
       key: 'famille',
       title: 'Mes antécédents familiaux',
-      intro: 'Des problèmes de santé chez tes parents ? Réponds seulement si tu le sais.',
+      intro: 'Des problèmes de santé chez tes parents ? Si tu ne sais pas, choisis « Je ne sais pas ».',
       content: (
         <>
-          <Multi label="Ta mère" options={FAMILY.map((n) => ({ value: n, label: n }))} value={d.familyMother} onChange={(familyMother) => update({ familyMother })} />
-          <Multi label="Ton père" options={FAMILY.map((n) => ({ value: n, label: n }))} value={d.familyFather} onChange={(familyFather) => update({ familyFather })} />
+          <Multi label="Ta mère" options={FAMILY_OPTIONS} value={d.familyMother} onChange={(v) => update((p) => ({ ...p, familyMother: familyChange(p.familyMother, v) }))} />
+          <Multi label="Ton père" options={FAMILY_OPTIONS} value={d.familyFather} onChange={(v) => update((p) => ({ ...p, familyFather: familyChange(p.familyFather, v) }))} />
           <TextField label="Précisions (facultatif)" multiline value={d.familyNote} onChange={(familyNote) => update({ familyNote })} placeholder="Autre pathologie, frères et sœurs…" />
         </>
       ),
