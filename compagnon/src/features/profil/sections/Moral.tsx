@@ -1,8 +1,15 @@
 import Scale from '../../../ui/Scale'
-import { TextField } from '../fields'
-import { useSectionEditor } from '../store'
+import { Choice, SubBlock, TextField, YesNo } from '../fields'
+import { newId, useSectionEditor } from '../store'
+import type { Psy, Therapy } from '../types'
 import SupportBox from '../SupportBox'
 import Wizard, { type Step } from '../Wizard'
+
+const PSY: { value: Psy; label: string }[] = [
+  { value: 'psychiatre', label: 'Psychiatre' },
+  { value: 'psychologue', label: 'Psychologue' },
+  { value: 'autre', label: 'Autre (psychothérapeute…)' },
+]
 
 // Seuil d'affichage de l'encart de soutien (moral ≤ 2 sur 10).
 const LOW = 2
@@ -11,6 +18,9 @@ export default function Moral() {
   const ed = useSectionEditor('moral')
   if (!ed) return null
   const { data: d, update } = ed
+  const therapies = d.therapies ?? []
+  const setTherapy = (id: string, patch: Partial<Therapy>) =>
+    update((p) => ({ ...p, therapies: (p.therapies ?? []).map((t) => (t.id === id ? { ...t, ...patch } : t)) }))
   const low = d.moral !== undefined && d.moral <= LOW
 
   const compare =
@@ -44,6 +54,52 @@ export default function Moral() {
           <Scale label="Te sens-tu fatigué·e ?" value={d.fatigue} onChange={(fatigue) => update({ fatigue })} minLabel="Pas du tout" maxLabel="Épuisé·e" />
           <Scale label="Te sens-tu stressé·e ?" value={d.stress} onChange={(stress) => update({ stress })} minLabel="Pas du tout" maxLabel="Énormément" />
           {low && <SupportBox />}
+        </>
+      ),
+    },
+    {
+      key: 'suivi',
+      title: 'Mon suivi',
+      intro: 'Consulter, c’est prendre soin de soi. Ces réponses restent sur ton téléphone.',
+      content: (
+        <>
+          <YesNo
+            label="As-tu déjà consulté un psychiatre ou un psychologue ?"
+            value={d.hadTherapy}
+            onChange={(hadTherapy) =>
+              update((p) => ({ ...p, hadTherapy, therapies: hadTherapy && !p.therapies?.length ? [{ id: newId() }] : p.therapies }))
+            }
+          />
+          {d.hadTherapy && (
+            <SubBlock>
+              {therapies.map((t, n) => (
+                <div key={t.id} className="profil-item">
+                  <div className="row-between">
+                    <strong>Suivi n° {n + 1}</strong>
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label={`Retirer le suivi n° ${n + 1}`}
+                      onClick={() => update((p) => ({ ...p, therapies: (p.therapies ?? []).filter((x) => x.id !== t.id) }))}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <Choice label="Avec qui ?" options={PSY} value={t.pro} onChange={(pro) => setTherapy(t.id, { pro })} />
+                  <TextField label="Pour quel motif ? (facultatif)" multiline value={t.reason} onChange={(reason) => setTherapy(t.id, { reason })} placeholder="Deuil, anxiété, burn-out…" />
+                  <TextField label="Pendant combien de temps ?" value={t.duration} onChange={(duration) => setTherapy(t.id, { duration })} placeholder="3 mois, 2 ans…" />
+                  <YesNo label="Est-ce encore en cours ?" value={t.ongoing} onChange={(ongoing) => setTherapy(t.id, { ongoing })} />
+                </div>
+              ))}
+              <button
+                type="button"
+                className="btn btn-secondary btn-block"
+                onClick={() => update((p) => ({ ...p, therapies: [...(p.therapies ?? []), { id: newId() }] }))}
+              >
+                + Ajouter un autre suivi
+              </button>
+            </SubBlock>
+          )}
         </>
       ),
     },

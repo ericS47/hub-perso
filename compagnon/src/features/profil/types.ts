@@ -96,10 +96,20 @@ export interface FoyerData {
 
 export type WorkStatus = 'retraite' | 'recherche' | 'arret' | 'etudes' | 'foyer' | 'autre'
 
+// Un emploi : on peut en cumuler plusieurs, chacun avec sa structure et ses horaires.
+export interface Emploi {
+  id: string
+  employer: string // nom de la structure (entreprise, association, particulier…)
+  job?: string
+  schedule?: Schedule
+}
+
 export interface TravailData {
   works?: boolean
-  job?: string
+  jobs?: Emploi[]
   status?: WorkStatus
+  // Ancien format (un seul emploi) : relu par travailJobs() puis remplacé par jobs.
+  job?: string
   schedule?: Schedule
 }
 
@@ -180,10 +190,23 @@ export interface Meal {
 
 export type Often = 'oui' | 'parfois' | 'non'
 
+// Où se prend un repas (plusieurs réponses possibles : ça peut changer selon les jours).
+export type MealPlace = 'maison' | 'emporte' | 'restaurant' | 'cantine' | 'achat'
+export type RestaurantWhy = 'plaisir' | 'travail'
+
+export interface MealHabit {
+  places?: MealPlace[]
+  restaurantPerWeek?: number // fois par semaine au restaurant pour ce repas
+  restaurantWhy?: RestaurantWhy[]
+}
+
 export interface AlimentationData {
+  lunch?: MealHabit
+  dinner?: MealHabit
+  // Ancien format (restaurant sans distinguer midi et soir), conservé tel quel.
   restaurant?: 'jamais' | 'parfois' | 'souvent'
   restaurantPerWeek?: number
-  restaurantWhy?: ('plaisir' | 'travail')[]
+  restaurantWhy?: RestaurantWhy[]
   allergies?: boolean
   allergiesDetail?: string
   aversions?: string
@@ -203,17 +226,40 @@ export interface AlimentationData {
 export type WaterAmount = 'moins05' | '05a1' | '1a15' | '15a2' | 'plus2'
 export type AlcoholFreq = 'jamais' | 'occasion' | 'semaine1-2' | 'semaine3-5' | 'quotidien'
 
+export type Sugar = 'non' | 'peu' | 'beaucoup' | 'edulcorant'
+export type DrinkFreq = 'rarement' | 'semaine' | 'quotidien'
+export type WaterWay = 'nature' | 'gazeuse' | 'sirop' | 'aromatisee' | 'autre'
+
+// Boisson ajoutée par le patient (autre boisson chaude ou froide).
+export interface DrinkItem {
+  id: string
+  name: string
+  cups?: number // boissons chaudes : tasses par jour
+  sugar?: Sugar
+  freq?: DrinkFreq // boissons froides
+  amount?: string
+}
+
 export interface HydratationData {
   coffee?: boolean
   coffeeCups?: number
+  coffeeSugar?: Sugar
   tea?: boolean
   teaCups?: number
-  otherDrinks?: string
+  teaSugar?: Sugar
+  chocolate?: boolean
+  chocolateCups?: number
+  chocolateSugar?: Sugar
+  otherHot?: DrinkItem[]
+  otherDrinks?: string // précisions libres (ancienne question « D'autres boissons ? »)
   water?: WaterAmount
+  waterWays?: WaterWay[]
+  waterNote?: string
   sodas?: boolean
   sodaTypes?: ('normal' | 'zero')[]
-  sodaFreq?: 'rarement' | 'semaine' | 'quotidien'
+  sodaFreq?: DrinkFreq
   sodaAmount?: string
+  otherCold?: DrinkItem[]
   alcohol?: AlcoholFreq
   alcoholContexts?: string[]
   alcoholQty?: number // verres par occasion
@@ -222,7 +268,20 @@ export interface HydratationData {
 }
 
 // ───── Mon moral ─────
+export type Psy = 'psychiatre' | 'psychologue' | 'autre'
+
+// Un suivi (thérapie) passé ou en cours ; il peut y en avoir plusieurs.
+export interface Therapy {
+  id: string
+  pro?: Psy
+  reason?: string
+  duration?: string
+  ongoing?: boolean
+}
+
 export interface MoralData {
+  hadTherapy?: boolean
+  therapies?: Therapy[]
   moral?: number
   moralBefore?: number
   epanoui?: number
@@ -230,6 +289,31 @@ export interface MoralData {
   stress?: number
   bodyImage?: number
   note?: string
+}
+
+// ───── Mon sommeil ─────
+export type SleepRegularity = 'regulier' | 'weekend' | 'aleatoire'
+export type FallAsleep = 'moins15' | '15a30' | '30a60' | 'plus60' | 'variable'
+export type NapLength = 'moins20' | '20a45' | '45a90' | 'plus90'
+export type SleepHistory = 'aucune' | 'toujours' | 'recent' | 'periode'
+
+export interface SommeilData {
+  bedtime?: string // 'HH:MM'
+  wakeTime?: string
+  regularity?: SleepRegularity
+  fallAsleep?: FallAsleep
+  wakesAtNight?: boolean
+  wakeCount?: number
+  backToSleep?: Often
+  naps?: boolean
+  napMoments?: string[]
+  napsPerWeek?: number
+  napLength?: NapLength
+  rituals?: string[]
+  ritualNote?: string
+  quality?: number // 1 à 10
+  history?: SleepHistory
+  historyDetail?: string
 }
 
 // ───── Mes attentes ─────
@@ -249,6 +333,7 @@ export interface SectionDataMap {
   douleurs: DouleursData
   alimentation: AlimentationData
   hydratation: HydratationData
+  sommeil: SommeilData
   moral: MoralData
   attentes: AttentesData
 }

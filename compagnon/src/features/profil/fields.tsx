@@ -167,6 +167,15 @@ export function DurationField({ label, value, onChange }: DurationProps) {
   )
 }
 
+export function TimeField({ label, value, onChange }: { label: string; value: string | undefined; onChange: (v: string) => void }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input type="time" className="input" value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
+    </label>
+  )
+}
+
 export function SubBlock({ children }: { children: ReactNode }) {
   return <div className="profil-sub">{children}</div>
 }
