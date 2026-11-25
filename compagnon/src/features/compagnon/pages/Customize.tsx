@@ -45,7 +45,7 @@ export default function Customize() {
           }}
         />
       </label>
-      <Link to="/compagnon/bienvenue" className="btn btn-ghost">
+      <Link to="/compagnon/bienvenue?revoir=1" className="btn btn-ghost">
         Revoir la présentation
       </Link>
     </PageShell>

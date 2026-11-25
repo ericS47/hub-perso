@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import type { CompanionSettings } from '../../../db'
 import { getSetting, setSetting } from '../../../lib/settings'
 import Avatar from '../Avatar'
@@ -17,9 +17,15 @@ export default function Welcome() {
   // Prénom déjà connu : on ne le redemande pas.
   const [knownName, setKnownName] = useState(false)
   const [companion, setCompanion] = useState<CompanionSettings>()
+  // Présentation déjà faite : on va à l'accueil, sauf si on demande à la revoir (« Personnaliser »).
+  // Sur iPhone, l'icône de l'écran d'accueil rouvre la page où elle a été ajoutée, parfois celle-ci.
+  const [params] = useSearchParams()
+  const replay = params.get('revoir') === '1'
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
-    void Promise.all([getSetting('companion'), getSetting('firstName')]).then(([c, f]) => {
+    void Promise.all([getSetting('companion'), getSetting('firstName'), getSetting('welcomeDone')]).then(([c, f, w]) => {
+      setDone(w)
       setCompanion(c)
       setFirstName(f)
       setKnownName(f.trim() !== '')
@@ -31,6 +37,7 @@ export default function Welcome() {
   }, [step])
 
   if (!companion) return null
+  if (done && !replay) return <Navigate to="/" replace />
   const t = makeT(companion.tutoiement)
   const name = companion.name.trim() || 'ton compagnon'
   const prenom = firstName.trim()
