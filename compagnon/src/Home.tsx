@@ -33,7 +33,7 @@ export default function Home() {
       <CompagnonCard />
       <AgendaCard />
       <ProfilCard />
-      <HomePopup companion={companion} hasMood={mood !== null} />
+      <HomePopup companion={companion} firstName={firstName ?? ''} hasMood={mood !== null} />
     </div>
   )
 }

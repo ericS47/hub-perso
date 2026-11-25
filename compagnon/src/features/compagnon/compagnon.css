@@ -192,3 +192,18 @@
 .compagnon-home-row { display: flex; align-items: flex-end; gap: 10px; }
 .compagnon-home .compagnon-bubble { flex: 1; max-width: none; background: var(--accent-soft); border-color: transparent; }
 .compagnon-end { scroll-margin-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom)); }
+
+/* Fenêtre d'ouverture : salut, visage, trois grandes cases */
+.compagnon-open-head { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 14px; }
+.compagnon-open-question { margin: 0; font-size: 1.15rem; font-weight: 700; text-align: center; }
+.compagnon-open-cases { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.compagnon-open-case {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px; color: inherit; font: inherit; cursor: pointer;
+}
+.compagnon-open-case:hover { border-color: var(--accent); }
+.compagnon-open-case > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.compagnon-open-case strong { font-size: 1.05rem; }
+.compagnon-open-icon { font-size: 1.6rem; width: 36px; text-align: center; }
+.compagnon-open-done { margin: 0; padding: 12px; border-radius: 12px; background: var(--bg); }
+.compagnon-open-session p { margin: 0 0 8px; }
