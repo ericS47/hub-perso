@@ -14,12 +14,15 @@ export default function Welcome() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [firstName, setFirstName] = useState('')
+  // Prénom déjà connu : on ne le redemande pas.
+  const [knownName, setKnownName] = useState(false)
   const [companion, setCompanion] = useState<CompanionSettings>()
 
   useEffect(() => {
     void Promise.all([getSetting('companion'), getSetting('firstName')]).then(([c, f]) => {
       setCompanion(c)
       setFirstName(f)
+      setKnownName(f.trim() !== '')
     })
   }, [])
 
@@ -76,7 +79,7 @@ export default function Welcome() {
               </li>
             </ul>
           </div>
-          <button type="button" className="btn btn-block" onClick={() => setStep(1)}>
+          <button type="button" className="btn btn-block" onClick={() => setStep(knownName ? 2 : 1)}>
             C’est compris, on commence
           </button>
         </section>
@@ -111,7 +114,7 @@ export default function Welcome() {
           </div>
           <CompanionPicker value={companion} onChange={setCompanion} />
           <div className="btn-row">
-            <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}>
+            <button type="button" className="btn btn-ghost" onClick={() => setStep(knownName ? 0 : 1)}>
               ← Retour
             </button>
             <button type="button" className="btn" disabled={!companion.name.trim()} onClick={() => setStep(3)}>

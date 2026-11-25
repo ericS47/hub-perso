@@ -13,6 +13,7 @@ import ProfilCard from './features/profil/HomeCard'
 export default function Home() {
   const welcomeDone = useSetting('welcomeDone')
   const companion = useSetting('companion')
+  const firstName = useSetting('firstName')
   const today = isoDate()
   // null : pas de météo aujourd'hui ; undefined : pas encore chargé.
   const mood = useLiveQuery(async () => (await db.moods.where('date').equals(today).first()) ?? null, [today])
@@ -24,7 +25,10 @@ export default function Home() {
     <div>
       <header className="home-head row">
         <Avatar companion={companion} size={72} mood="content" />
-        <h1>{companion.tutoiement ? 'Content de te revoir !' : 'Content de vous revoir !'}</h1>
+        <h1>
+          {companion.tutoiement ? 'Content de te revoir' : 'Content de vous revoir'}
+          {firstName ? `, ${firstName}` : ''} !
+        </h1>
       </header>
       <CompagnonCard />
       <AgendaCard />
