@@ -96,6 +96,21 @@ export interface Session {
   note?: string
   // Si manquée : lien vers l'entrée de journal où le patient explique pourquoi.
   journalId?: number
+  // Séance née d'une répétition hebdomadaire (table series).
+  seriesId?: number
+  createdAt: number
+}
+
+// Séance répétée chaque semaine, à partir d'un jour donné. Les séances sont créées
+// à l'avance sur quelques semaines (generatedUntil), puis complétées à chaque ouverture.
+export interface SessionSeries {
+  id?: number
+  activity: string
+  durationMin: number
+  start: string // 'HH:MM'
+  from: string // 1re date (fixe aussi le jour de la semaine)
+  until?: string // dernière date incluse ; absente = sans fin
+  generatedUntil: string // dernière date déjà créée dans sessions
   createdAt: number
 }
 
@@ -138,6 +153,7 @@ class CompagnonDB extends Dexie {
   profile!: Table<ProfileSection, ProfileSectionId>
   constraints!: Table<Constraint, number>
   sessions!: Table<Session, number>
+  series!: Table<SessionSeries, number>
   journal!: Table<JournalEntry, number>
   moods!: Table<MoodCheck, number>
   games!: Table<GameResult, number>
@@ -152,6 +168,11 @@ class CompagnonDB extends Dexie {
       journal: '++id, type, createdAt, sessionId',
       moods: '++id, date',
       games: '++id, game, createdAt',
+    })
+    // v2 : séances répétées chaque semaine.
+    this.version(2).stores({
+      sessions: '++id, date, status, seriesId',
+      series: '++id',
     })
   }
 }

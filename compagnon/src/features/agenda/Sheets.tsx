@@ -7,6 +7,7 @@ import Sheet from '../../ui/Sheet'
 import Scale from '../../ui/Scale'
 import { ActivityPicker, DurationPicker } from './Pickers'
 import SlotPicker from './SlotPicker'
+import { createSeries, stopSeriesFrom } from './series'
 import { useCompanion, useConstraints, useReminders } from './hooks'
 import {
   DISPLAY_LABEL,
@@ -75,6 +76,12 @@ function DetailSheet({ session, onClose, onMode }: { session: Session; onClose: 
         <strong>{longDay(session.date)}</strong>
         <br />
         {timeRange(session)} · {formatDuration(session.durationMin)}
+        {session.seriesId !== undefined && (
+          <>
+            <br />
+            <span className="muted">🔁 Chaque semaine</span>
+          </>
+        )}
       </p>
       <p>
         <span className={`agenda-status agenda-status-${state}`}>
@@ -137,6 +144,11 @@ export function SessionSheet({ session, defaultDate, onClose }: { session?: Sess
   const [date, setDate] = useState(session?.date ?? defaultDate ?? today)
   const [start, setStart] = useState(session?.start ?? '')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Nouvelle séance : une seule fois, ou chaque semaine à partir de ce jour.
+  const [repeat, setRepeat] = useState(false)
+  // Séance d'une répétition encore à venir : on touche seulement celle-ci, ou aussi les suivantes.
+  const inSeries = session?.seriesId !== undefined && session.status === 'prevue'
+  const [scope, setScope] = useState<'one' | 'next'>('one')
   const dateId = useId()
 
   // Autres séances autour de ce jour (la veille pour les séances qui passent minuit).
@@ -156,20 +168,40 @@ export function SessionSheet({ session, defaultDate, onClose }: { session?: Sess
   async function save() {
     if (!valid) return
     const data = { activity: activity.trim(), durationMin, date, start }
-    if (session?.id !== undefined) {
+    if (session?.seriesId !== undefined && inSeries && scope === 'next') {
+      // La répétition s'arrête ici et repart avec les nouveaux réglages.
+      await stopSeriesFrom(session.seriesId, session.date)
+      await createSeries(data)
+    } else if (session?.id !== undefined) {
       // Une séance « pas faite » déplacée dans le futur redevient prévue.
       const reopen = session.status === 'manquee' && sessionEnd(data) > new Date()
       await db.sessions.update(session.id, reopen ? { ...data, status: 'prevue' } : data)
+    } else if (repeat) {
+      await createSeries(data)
     } else {
       await db.sessions.add({ ...data, status: 'prevue', createdAt: Date.now() })
     }
     onClose()
   }
 
-  async function remove() {
-    if (session?.id !== undefined) await db.sessions.delete(session.id)
+  async function remove(all = false) {
+    if (all && session?.seriesId !== undefined) await stopSeriesFrom(session.seriesId, session.date)
+    else if (session?.id !== undefined) await db.sessions.delete(session.id)
     onClose()
   }
+
+  const choice = <V extends string | boolean>(label: string, value: V, options: { v: V; label: string }[], set: (v: V) => void) => (
+    <div className="field">
+      <span>{label}</span>
+      <div className="agenda-weekswitch" role="group" aria-label={label}>
+        {options.map((o) => (
+          <button key={String(o.v)} type="button" aria-pressed={value === o.v} className={value === o.v ? 'chip on' : 'chip'} onClick={() => set(o.v)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <Sheet title={session ? 'Modifier la séance' : 'Ajouter une séance'} onClose={onClose}>
@@ -188,6 +220,16 @@ export function SessionSheet({ session, defaultDate, onClose }: { session?: Sess
         now={now}
         onChange={setStart}
       />
+      {!session &&
+        choice('Répéter cette séance ?', repeat, [
+          { v: false, label: 'Juste cette fois' },
+          { v: true, label: '🔁 Chaque semaine à partir de ce jour' },
+        ], setRepeat)}
+      {inSeries &&
+        choice('Cette séance se répète chaque semaine. Modifier…', scope, [
+          { v: 'one', label: 'Seulement celle-ci' },
+          { v: 'next', label: 'Celle-ci et les suivantes' },
+        ], setScope)}
       {!valid && <p className="muted agenda-small">Choisis une activité et une heure pour enregistrer.</p>}
       <button type="button" className="btn btn-block" disabled={!valid} onClick={save}>
         Enregistrer
@@ -197,11 +239,16 @@ export function SessionSheet({ session, defaultDate, onClose }: { session?: Sess
         <div className="agenda-delete">
           {confirmDelete ? (
             <div className="card card-warm">
-              <p>Supprimer cette séance de ton agenda ?</p>
+              <p>{inSeries ? 'Cette séance se répète chaque semaine. Que veux-tu supprimer ?' : 'Supprimer cette séance de ton agenda ?'}</p>
               <div className="btn-row">
-                <button type="button" className="btn btn-danger" onClick={remove}>
-                  Oui, supprimer
+                <button type="button" className="btn btn-danger" onClick={() => void remove()}>
+                  {inSeries ? 'Seulement celle-ci' : 'Oui, supprimer'}
                 </button>
+                {inSeries && (
+                  <button type="button" className="btn btn-danger" onClick={() => void remove(true)}>
+                    Celle-ci et les suivantes
+                  </button>
+                )}
                 <button type="button" className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>
                   Non, la garder
                 </button>

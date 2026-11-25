@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { CompanionSettings } from '../../../db'
 import { getSetting, setSetting } from '../../../lib/settings'
 import Avatar from '../Avatar'
+import { markSeen } from '../sujets'
 import CompanionPicker from '../CompanionPicker'
 import { makeT } from '../voice'
 
@@ -36,6 +37,8 @@ export default function Welcome() {
     await setSetting('companion', { ...companion, name: companion.name.trim() || 'Bondi' })
     await setSetting('firstName', firstName.trim())
     await setSetting('welcomeDone', true)
+    // Juste après la présentation, pas besoin de la fenêtre « De quoi veux-tu parler ? ».
+    markSeen()
     navigate(to, { replace: true })
   }
 

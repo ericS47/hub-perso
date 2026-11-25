@@ -192,7 +192,11 @@ export interface Meal {
   plateNote?: string
   fromage?: MealExtra
   dessert?: MealExtra
-  // Collation : ce qu'elle contient et le moment.
+  // Petit-déjeuner : repas classique (plateau) ou petit-déjeuner du matin (viennoiserie, tartines…).
+  breakfastStyle?: 'classique' | 'matin'
+  viennoiserie?: boolean
+  viennoiserieFreq?: 'quotidien' | 'semaine' | 'weekend' | 'rarement'
+  // Collation et petit-déjeuner du matin : ce qu'il contient (et le moment pour la collation).
   items?: string[]
   time?: string
   note?: string
@@ -327,10 +331,29 @@ export interface SommeilData {
 }
 
 // ───── Mes attentes ─────
+export type GoalDomain = 'ap' | 'diet' | 'psy' | 'medical'
+export type GoalPriority = 'important' | 'moyen' | 'plus-tard'
+
+export interface SubGoal {
+  id: string
+  text: string
+  priority?: GoalPriority
+}
+
+// Un objectif dans un domaine, qui peut se décliner en sous-objectifs.
+export interface Goal {
+  id: string
+  domain: GoalDomain
+  text: string
+  priority?: GoalPriority
+  subs?: SubGoal[]
+}
+
 export interface AttentesData {
   reasons?: string[]
   why?: string
   expectations?: string
+  goals?: Goal[]
 }
 
 export interface SectionDataMap {

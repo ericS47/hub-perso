@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import BottomNav from './ui/BottomNav'
 import Home from './Home'
@@ -7,9 +8,14 @@ import Compagnon from './features/compagnon'
 import Jeux from './features/jeux'
 import Plus from './features/plus'
 import { ReminderRunner } from './features/agenda/reminders'
+import { extendSeries } from './features/agenda/series'
 
 // Chaque fonctionnalité gère ses propres sous-routes (voir src/features/*/index.tsx).
 export default function App() {
+  // Séances répétées : on complète les semaines à venir à chaque ouverture.
+  useEffect(() => {
+    void extendSeries().catch(() => undefined)
+  }, [])
   return (
     <div className="app">
       <main className="content">

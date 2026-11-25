@@ -27,7 +27,7 @@ export const PROFILE_SECTIONS: SectionMeta[] = [
   { id: 'hydratation', title: 'Mon hydratation', icon: '💧', group: 'Mon hydratation', hint: 'Eau, boissons chaudes et froides, alcool' },
   { id: 'sommeil', title: 'Mon sommeil', icon: '😴', group: 'Mon sommeil', hint: 'Horaires, nuits, rituels du coucher' },
   { id: 'moral', title: 'Mon moral', icon: '🌤️', group: 'Mon moral', hint: 'Comment je me sens' },
-  { id: 'attentes', title: 'Mes attentes', icon: '🎯', group: 'Mes attentes', hint: 'Pourquoi je viens ici' },
+  { id: 'attentes', title: 'Mes attentes', icon: '🎯', group: 'Mes attentes', hint: 'Pourquoi je viens ici, mes objectifs' },
 ]
 
 export function sectionMeta(id: ProfileSectionId): SectionMeta {
