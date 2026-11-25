@@ -72,7 +72,7 @@ export default function HomeCard() {
       <p className="compagnon-bubble them">{phrase}</p>
       <div className="btn-row">
         <Link to="/compagnon" className="btn">
-          💬 Parler à {companion.name}
+          💬 Parler
         </Link>
         {!data.mood && (
           <Link to="/compagnon/meteo" className="btn btn-secondary">

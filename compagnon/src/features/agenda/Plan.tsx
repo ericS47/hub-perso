@@ -6,6 +6,7 @@ import { addDays, isoDate, startOfWeek, weekday, weekDates } from '../../lib/dat
 import PageShell from '../../ui/PageShell'
 import { ActivityPicker, DayPicker, DurationPicker } from './Pickers'
 import SlotPicker from './SlotPicker'
+import { createSeries } from './series'
 import { sortSessions, useCompanion, useConstraints, useReminders } from './hooks'
 import {
   activityEmoji,
@@ -67,6 +68,8 @@ export default function Plan() {
   const [step, setStep] = useState<Step>({ kind: 'count' })
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [copiedSkipped, setCopiedSkipped] = useState(0)
+  // Ces séances : juste cette semaine, ou chaque semaine à partir de celle-ci.
+  const [repeatWeekly, setRepeatWeekly] = useState(false)
 
   if (!constraints || !existing || !lastWeek) return <PageShell title="Je prépare ma semaine" backTo="/agenda">{null}</PageShell>
 
@@ -113,6 +116,12 @@ export default function Plan() {
 
   async function saveAll() {
     const createdAt = Date.now()
+    if (repeatWeekly) {
+      const saved: Session[] = []
+      for (const d of drafts) saved.push(await createSeries({ ...d, activity: d.activity.trim() }))
+      setStep({ kind: 'done', saved })
+      return
+    }
     const rows: Session[] = drafts.map((d) => ({ ...d, activity: d.activity.trim(), status: 'prevue', createdAt }))
     const ids = await db.sessions.bulkAdd(rows, { allKeys: true })
     setStep({ kind: 'done', saved: rows.map((r, k) => ({ ...r, id: ids[k] })) })
@@ -285,13 +294,27 @@ export default function Plan() {
         )}
         {drafts.length > 0 && (
           <div className="stack">
+            <section className="card">
+              <h2>Et les semaines suivantes ?</h2>
+              <div className="agenda-weekswitch" role="group" aria-label="Répéter ces séances ?">
+                <button type="button" aria-pressed={!repeatWeekly} className={!repeatWeekly ? 'chip on' : 'chip'} onClick={() => setRepeatWeekly(false)}>
+                  Juste cette semaine
+                </button>
+                <button type="button" aria-pressed={repeatWeekly} className={repeatWeekly ? 'chip on' : 'chip'} onClick={() => setRepeatWeekly(true)}>
+                  🔁 Toutes les semaines à partir de celle-ci
+                </button>
+              </div>
+              {repeatWeekly && (
+                <p className="muted agenda-small">Ces séances seront prévues chaque semaine, au même jour et à la même heure. Tu pourras toujours en modifier ou en supprimer une.</p>
+              )}
+            </section>
             <button
               type="button"
               className="btn btn-block"
               disabled={drafts.some((d) => !d.activity.trim() || !d.start || d.date < today)}
               onClick={saveAll}
             >
-              Enregistrer ma semaine
+              {repeatWeekly ? 'Enregistrer, chaque semaine' : 'Enregistrer ma semaine'}
             </button>
             <button
               type="button"

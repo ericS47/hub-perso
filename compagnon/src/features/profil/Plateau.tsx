@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Chips from '../../ui/Chips'
-import { TextField } from './fields'
+import { Choice, TextField, YesNo } from './fields'
 import { newId } from './store'
 import type { Meal, MealExtra, MealKind, PlateShares } from './types'
 import { toggleIn } from './utils'
@@ -32,6 +32,26 @@ const SNACK_ITEMS = [
   { value: 'autre', label: '✳️ Autre' },
 ]
 const SNACK_ICON: Record<string, string> = Object.fromEntries(SNACK_ITEMS.map((i) => [i.value, i.label.split(' ')[0]]))
+
+const BREAKFAST_ITEMS = [
+  { value: 'tartine', label: '🍞 Tartines' },
+  { value: 'sandwich', label: '🥪 Sandwich' },
+  { value: 'bagel', label: '🥯 Bagel' },
+  { value: 'oeuf', label: '🍳 Œufs' },
+  { value: 'cereales', label: '🥣 Céréales' },
+  { value: 'laitage', label: '🥛 Laitage' },
+  { value: 'fruit', label: '🍎 Fruit' },
+  { value: 'boisson', label: '☕ Juste une boisson' },
+  { value: 'autre', label: '✳️ Autre' },
+]
+const BREAKFAST_ICON: Record<string, string> = { ...Object.fromEntries(BREAKFAST_ITEMS.map((i) => [i.value, i.label.split(' ')[0]])), viennoiserie: '🥐' }
+
+const VIENNOISERIE_FREQ = [
+  { value: 'quotidien' as const, label: 'Tous les jours' },
+  { value: 'semaine' as const, label: 'Plusieurs fois par semaine' },
+  { value: 'weekend' as const, label: 'Le week-end' },
+  { value: 'rarement' as const, label: 'De temps en temps' },
+]
 
 const SNACK_TIMES = [
   { value: 'matin', label: 'Le matin' },
@@ -173,15 +193,17 @@ function TrayDrawing({ meal }: { meal: Meal }) {
   )
 }
 
-function SnackDrawing({ meal }: { meal: Meal }) {
-  const items = meal.items ?? []
+function SnackDrawing({ meal, breakfast }: { meal: Meal; breakfast?: boolean }) {
+  const icons = breakfast ? BREAKFAST_ICON : SNACK_ICON
+  const labels = breakfast ? [...BREAKFAST_ITEMS, { value: 'viennoiserie', label: '🥐 Viennoiserie' }] : SNACK_ITEMS
+  const items = breakfast && meal.viennoiserie ? ['viennoiserie', ...(meal.items ?? [])] : (meal.items ?? [])
   const pos = (n: number) => {
     if (items.length === 1) return { x: 110, y: 82 }
     const ang = (n / items.length) * 2 * Math.PI - Math.PI / 2
     return { x: 110 + 32 * Math.cos(ang), y: 82 + 32 * Math.sin(ang) }
   }
   return (
-    <svg viewBox="0 0 220 160" className="profil-snack" role="img" aria-label={`Collation : ${items.length ? items.map((i) => SNACK_ITEMS.find((s) => s.value === i)?.label.slice(3)).join(', ') : 'vide'}`}>
+    <svg viewBox="0 0 220 160" className="profil-snack" role="img" aria-label={`${breakfast ? 'Petit-déjeuner' : 'Collation'} : ${items.length ? items.map((i) => labels.find((s) => s.value === i)?.label.slice(3)).join(', ') : 'vide'}`}>
       <ellipse cx={110} cy={82} rx={92} ry={66} className="profil-tray-wood" />
       <circle cx={110} cy={78} r={58} className="profil-plate-rim" />
       <circle cx={110} cy={78} r={48} className="profil-plate-in" />
@@ -194,7 +216,7 @@ function SnackDrawing({ meal }: { meal: Meal }) {
         const p = pos(n)
         return (
           <text key={it} x={p.x} y={p.y + 4} textAnchor="middle" fontSize={24}>
-            {SNACK_ICON[it]}
+            {icons[it]}
           </text>
         )
       })}
@@ -263,6 +285,21 @@ function PlateSliders({ value, onChange }: { value: PlateShares | undefined; onC
   )
 }
 
+// Petit-déjeuner : un vrai repas (on compose le plateau) ou un petit-déjeuner du matin.
+function BreakfastStyle({ meal, patch }: { meal: Meal; patch: (p: Partial<Meal>) => void }) {
+  return (
+    <Choice
+      label="Ton petit-déjeuner, c’est plutôt…"
+      options={[
+        { value: 'matin', label: '🥐 Un petit-déjeuner du matin (viennoiserie, tartines…)' },
+        { value: 'classique', label: '🍽️ Un repas classique (assiette, comme un déjeuner)' },
+      ]}
+      value={meal.breakfastStyle}
+      onChange={(breakfastStyle) => patch({ breakfastStyle })}
+    />
+  )
+}
+
 interface Props {
   meals: Meal[] | undefined
   onChange: (update: (meals: Meal[]) => Meal[]) => void
@@ -315,9 +352,38 @@ export default function Plateau({ meals, onChange }: Props) {
               Retirer cette collation
             </button>
           </>
+        ) : meal.kind === 'petit-dejeuner' && meal.breakfastStyle !== 'classique' && !meal.skipped ? (
+          <>
+            <SnackDrawing meal={meal} breakfast />
+            <BreakfastStyle meal={meal} patch={patch} />
+            {meal.breakfastStyle === 'matin' && (
+              <>
+                <YesNo label="Prends-tu des viennoiseries ?" value={meal.viennoiserie} onChange={(viennoiserie) => patch({ viennoiserie })} />
+                {meal.viennoiserie && (
+                  <div className="profil-sub">
+                    <Choice label="À quelle fréquence ?" options={VIENNOISERIE_FREQ} value={meal.viennoiserieFreq} onChange={(viennoiserieFreq) => patch({ viennoiserieFreq })} />
+                  </div>
+                )}
+                {(meal.viennoiserie === false || (meal.viennoiserie && meal.viennoiserieFreq && meal.viennoiserieFreq !== 'quotidien')) && (
+                  <Chips
+                    label={meal.viennoiserie ? 'Les autres jours, plutôt…' : 'Qu’est-ce que tu prends, plutôt ?'}
+                    options={BREAKFAST_ITEMS}
+                    value={meal.items ?? []}
+                    onChange={(it) => patch({ items: toggleIn(meal.items, it) })}
+                  />
+                )}
+                <TextField label="Précision (facultatif)" value={meal.note} onChange={(note) => patch({ note })} placeholder="Deux tartines beurre-confiture, un café…" />
+              </>
+            )}
+            <label className="profil-check profil-skip">
+              <input type="checkbox" checked={!!meal.skipped} onChange={(e) => patch({ skipped: e.target.checked })} />
+              <span>Je ne prends pas de petit-déjeuner, en général</span>
+            </label>
+          </>
         ) : (
           <>
             <TrayDrawing meal={meal} />
+            {meal.kind === 'petit-dejeuner' && !meal.skipped && <BreakfastStyle meal={meal} patch={patch} />}
             <label className="profil-check profil-skip">
               <input type="checkbox" checked={!!meal.skipped} onChange={(e) => patch({ skipped: e.target.checked })} />
               <span>Je ne prends pas ce repas, en général</span>

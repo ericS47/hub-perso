@@ -18,6 +18,9 @@ registerSW({
   },
 })
 
+// Demande au navigateur de ne pas effacer les données de l'appli (profil, compagnon…) quand la place manque.
+void navigator.storage?.persist?.().catch(() => false)
+
 // HashRouter : l'appli vit dans un sous-dossier de GitHub Pages, les liens directs
 // fonctionnent ainsi sans page 404 dédiée.
 createRoot(document.getElementById('root')!).render(

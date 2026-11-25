@@ -3,7 +3,7 @@ import { getSetting } from '../../lib/settings'
 import type { ConversationContext, ScriptId } from './engine/types'
 
 // Lecture défensive de la rubrique « attentes » du profil (data est `unknown`).
-// Forme attendue (profil) : { why?: string; expectations?: string; reasons?: string[] }.
+// Forme attendue (profil) : { why?: string; expectations?: string; reasons?: string[]; goals?: { text, priority }[] }.
 export async function readAttentes(): Promise<string[]> {
   try {
     const row = await db.profile.get('attentes')
@@ -13,6 +13,11 @@ export async function readAttentes(): Promise<string[]> {
     const out: string[] = []
     const add = (v: unknown) => {
       if (typeof v === 'string' && v.trim().length >= 3) out.push(v.trim().slice(0, 160))
+    }
+    // Objectifs (forme : { text, priority, subs }) : les plus importants d'abord.
+    if (Array.isArray(d.goals)) {
+      const rank = (g: unknown) => ({ important: 0, moyen: 1 })[String((g as { priority?: unknown })?.priority)] ?? 2
+      ;[...d.goals].sort((a, b) => rank(a) - rank(b)).forEach((g) => add((g as { text?: unknown })?.text))
     }
     add(d.why)
     add(d.expectations)
