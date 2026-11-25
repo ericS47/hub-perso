@@ -15,7 +15,7 @@ type View = 'menu' | 'aborder' | 'noter' | 'redefinir'
 
 const CASES: { view: Exclude<View, 'menu'>; icon: string; title: string; text: string }[] = [
   { view: 'aborder', icon: '💬', title: 'Aborder', text: 'Me faire part de quelque chose' },
-  { view: 'noter', icon: '✅', title: 'Noter', text: 'Mon moral du jour, une séance faite' },
+  { view: 'noter', icon: '✅', title: 'Faire le point', text: 'Mon moral du jour, une séance faite' },
   { view: 'redefinir', icon: '🧭', title: 'Redéfinir', text: 'Ajuster une séance, mes objectifs…' },
 ]
 
