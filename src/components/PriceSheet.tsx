@@ -5,6 +5,8 @@ interface Props {
   reference?: string
   title: string
   lego: boolean
+  // Jeux de société : ajoute les boutiques spécialisées (Philibert, Ludum).
+  boardgame?: boolean
   onClose: () => void
   // Page Promo : propose d'ajouter le produit aux prix suivis.
   onFollow?: () => void
@@ -15,6 +17,8 @@ interface Site {
   url: (q: string, ref: string) => string
   // Site propre aux LEGO (masqué pour les autres produits).
   lego?: boolean
+  // Boutique spécialisée en jeux de société (masquée pour les autres produits).
+  boardgame?: boolean
   // Annonces de particuliers : on y cherche par nom, jamais par code-barres.
   byName?: boolean
 }
@@ -38,6 +42,18 @@ const GROUPS: { title: string; hint: string; sites: Site[] }[] = [
     hint: 'Les grandes enseignes (LEGO.com donne le prix officiel des sets)',
     sites: [
       { name: 'LEGO.com', url: (_q, ref) => `https://www.lego.com/fr-fr/search?q=${e(ref)}`, lego: true },
+      {
+        name: 'Philibert',
+        url: (q) => `https://www.philibertnet.com/fr/recherche?search_query=${e(q)}`,
+        boardgame: true,
+        byName: true,
+      },
+      {
+        name: 'Ludum',
+        url: (q) => `https://www.ludum.fr/recherche?controller=search&s=${e(q)}`,
+        boardgame: true,
+        byName: true,
+      },
       { name: 'Amazon', url: (q) => `https://www.amazon.fr/s?k=${e(q)}` },
       { name: 'Fnac', url: (q) => `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${e(q)}` },
       { name: 'Cdiscount', url: (q) => `https://www.cdiscount.com/search/10/${e(q.toLowerCase()).replace(/%20/g, '+')}.html` },
@@ -77,11 +93,17 @@ const GROUPS: { title: string; hint: string; sites: Site[] }[] = [
   },
 ]
 
-export default function PriceSheet({ reference, title, lego, onClose, onFollow }: Props) {
+export default function PriceSheet({ reference, title, lego, boardgame = false, onClose, onFollow }: Props) {
   const ref = (lego ? reference?.replace(/-1$/, '') : reference) || title
   // Code-barres : reconnu tel quel par la plupart des boutiques et comparateurs.
-  const query = reference ? (lego ? `LEGO ${ref}` : ref) : title
-  const groups = GROUPS.map((g) => ({ ...g, sites: g.sites.filter((s) => lego || !s.lego) })).filter((g) => g.sites.length)
+  // Jeux de société sans code-barres : « jeu de société » évite les livres ou
+  // films du même nom dans les grandes boutiques.
+  const query = reference ? (lego ? `LEGO ${ref}` : ref) : boardgame ? `${title} jeu de société` : title
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    hint: boardgame && g.title.startsWith('🛒') ? 'Les boutiques spécialisées en jeux (Philibert, Ludum) et les grandes enseignes' : g.hint,
+    sites: g.sites.filter((s) => (lego || !s.lego) && (boardgame || !s.boardgame)),
+  })).filter((g) => g.sites.length)
 
   return (
     <Sheet title="💶 Comparer les prix" onClose={onClose}>

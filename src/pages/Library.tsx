@@ -419,7 +419,7 @@ export default function Library() {
                   ★ Conseillé
                 </button>
               </div>
-              {(centered.category === 'lego' || centered.category === 'puzzles') && (
+              {(centered.category === 'lego' || centered.category === 'puzzles' || centered.category === 'jeux-societe') && (
                 <button type="button" className="btn ghost price-btn" onClick={() => setPricing(centered)}>
                   💶 Comparer les prix
                 </button>
@@ -469,6 +469,7 @@ export default function Library() {
           reference={pricing.reference}
           title={pricing.title}
           lego={pricing.category === 'lego'}
+          boardgame={pricing.category === 'jeux-societe'}
           onClose={() => setPricing(undefined)}
         />
       )}
